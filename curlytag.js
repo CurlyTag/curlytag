@@ -412,7 +412,7 @@ class CurlyTag {
         let regex = /\{\{-?\s([\s\S]*?)\s-?\}\}|\{%-?\s([\s\S]*?)\s-?%}|\{\#\s([\s\S]*?)\s\#\}/g;
 
         while ((match = regex.exec(template)) !== null) {
-            let [raw, output, tag] = match;
+            let [raw, output, tag, comment] = match;
 
             let line = template.substring(0, match.index).split(/\r\n|\r|\n/).length;
 

@@ -495,10 +495,6 @@ class CurlyTag {
 
             return func({ ...ctx });
         } catch (error)  {
-            console.trace();
-
-            console.log("http://localhost:8000/path/to/file.js:83:2");
-
             console.log(`[Template] Warning: Evaluate error '${error}'`);
 
             return undefined;
@@ -509,17 +505,11 @@ class CurlyTag {
      * Apply chain of filters — now supports multiple comma-separated arguments per filter
      */
     parseFilter(value, expression = '', ctx) {
-        if (!expression.length) return value;
-
-        let filters = [];
-
-        if (expression.indexOf('|') !== -1){
-            filters = expression.split('|').map(value => value.trim());
-        } else {
-            filters = [expression];
-        }
+        if (expression == undefined) return value;
 
         let result = value;
+
+        let filters = (expression.indexOf('|') !== -1) ? expression.split('|').map(value => value.trim()) : [expression];
 
         for (let filter of filters) {
             let match = filter.match(/^([^:]*):?\s?(.+)?$/);

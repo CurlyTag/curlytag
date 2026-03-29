@@ -1,3 +1,5 @@
+{% raw %}
+
 # curlytag
 
 CurlyTag - Open Source JavaScript Template Engine
@@ -296,3 +298,4 @@ vp test --ui --watch
 > [!NOTE]
 >
 > The UI starts at `http://localhost:51204/__vitest__/` and stays open as long as the process is running. Always use `--watch` together with `--ui`, otherwise the server exits right after the test run.
+{% endraw %}

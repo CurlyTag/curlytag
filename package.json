@@ -1,12 +1,28 @@
 {
-  "name": "curlytag",
+  "name": "@curlytag/curlytag",
   "version": "0.1.0",
   "description": "CurlyTag - Open Source JavaScript Template Engine",
-  "keywords": [],
+  "keywords": ["template", "template-engine", "html", "javascript", "twig"],
   "license": "MIT",
-  "author": "",
+  "author": "Daniel Kerr",
   "type": "module",
   "main": "curlytag.js",
+  "exports": {
+    ".": "./curlytag.js"
+  },
+  "files": [
+    "curlytag.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/curlytag/curlytag.git"
+  },
+  "homepage": "https://www.curlytag.com/",
+  "bugs": {
+    "url": "https://github.com/curlytag/curlytag/issues"
+  },
   "scripts": {
     "check": "vp check",
     "lint": "vp lint",

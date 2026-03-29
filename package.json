@@ -1,0 +1,22 @@
+{
+  "name": "curlytag",
+  "version": "0.1.0",
+  "description": "CurlyTag - Open Source JavaScript Template Engine",
+  "keywords": [],
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "main": "curlytag.js",
+  "scripts": {
+    "check": "vp check",
+    "lint": "vp lint",
+    "fmt": "vp fmt",
+    "test": "vp test",
+    "prepare": "vp config"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^4.1.2",
+    "vite-plus": "^0.1.14"
+  },
+  "packageManager": "npm@11.12.1"
+}

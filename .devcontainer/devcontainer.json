@@ -1,0 +1,18 @@
+{
+  "name": "CurlyTag",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+  "remoteEnv": {
+    "PATH": "${containerEnv:HOME}/.vite-plus/bin:${containerEnv:PATH}"
+  },
+  "postCreateCommand": "curl -fsSL https://vite.plus | bash && export PATH=\"$HOME/.vite-plus/bin:$PATH\" && vp install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["VoidZero.vite-plus-extension-pack", "EditorConfig.EditorConfig"],
+      "settings": {
+        "editor.defaultFormatter": "oxc.oxc-vscode",
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "file"
+      }
+    }
+  }
+}

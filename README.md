@@ -1,5 +1,3 @@
-{% raw %}
-
 # curlytag
 
 CurlyTag - Open Source JavaScript Template Engine
@@ -24,7 +22,7 @@ const html = await template.render('home', { title: 'Welcome' });
 
 Variables are auto-escaped by default:
 
-```
+```liquid
 {{ user.name }}
 {{ price | round: 2 }}
 {{ bio | default: "No bio" }}
@@ -34,7 +32,7 @@ Variables are auto-escaped by default:
 
 ### Conditions
 
-```
+```liquid
 {% if user.is_admin %}
   Welcome, admin!
 {% elseif user.is_moderator %}
@@ -44,7 +42,7 @@ Variables are auto-escaped by default:
 {% endif %}
 ```
 
-```
+```liquid
 {% unless user.verified %}
   Please verify your email.
 {% endunless %}
@@ -52,7 +50,7 @@ Variables are auto-escaped by default:
 
 ### Loops
 
-```
+```liquid
 {% for item in items %}
   {{ loop.index }}. {{ item }}
 {% endfor %}
@@ -64,13 +62,13 @@ Loop variables: `loop.index`, `loop.index0`, `loop.first`, `loop.last`, `loop.le
 
 ### Assign
 
-```
+```liquid
 {% assign greeting = "hello" | upper %}
 ```
 
 ### Case / When
 
-```
+```liquid
 {% case status %}
   {% when "active" %}
     Active
@@ -85,7 +83,7 @@ Loop variables: `loop.index`, `loop.index0`, `loop.first`, `loop.last`, `loop.le
 
 Outputs a value with optional filters, as a tag instead of `{{ }}`:
 
-```
+```liquid
 {% echo name | upper %}
 ```
 
@@ -93,7 +91,7 @@ Outputs a value with optional filters, as a tag instead of `{{ }}`:
 
 Captures content into a variable:
 
-```
+```liquid
 {% capture sidebar %}
   <nav>...</nav>
 {% endcapture %}
@@ -101,7 +99,7 @@ Captures content into a variable:
 
 ### Include
 
-```
+```liquid
 {% include path/to/template %}
 ```
 
@@ -109,7 +107,7 @@ Captures content into a variable:
 
 Applies a filter to an entire block:
 
-```
+```liquid
 {% filter upper %}
   this will be uppercased
 {% endfilter %}
@@ -119,7 +117,7 @@ Applies a filter to an entire block:
 
 Outputs content without parsing:
 
-```
+```liquid
 {% raw %}
   {{ this will not be parsed }}
 {% endraw %}
@@ -129,7 +127,7 @@ Outputs content without parsing:
 
 Block comment:
 
-```
+```liquid
 {% comment %}
   This will not appear in the output.
 {% endcomment %}
@@ -137,7 +135,7 @@ Block comment:
 
 Inline comment:
 
-```
+```liquid
 {# This will not appear in the output. #}
 ```
 
@@ -145,7 +143,7 @@ Inline comment:
 
 Add a `-` to trim whitespace on either side of a tag or output:
 
-```
+```liquid
 {{- name -}}
 {%- if active -%}
 ```
@@ -298,4 +296,3 @@ vp test --ui --watch
 > [!NOTE]
 >
 > The UI starts at `http://localhost:51204/__vitest__/` and stays open as long as the process is running. Always use `--watch` together with `--ui`, otherwise the server exits right after the test run.
-{% endraw %}

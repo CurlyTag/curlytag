@@ -629,6 +629,30 @@ class CurlyTag {
         });
     }
 
+    handleEcho(token, stack, ctx, index) {
+        let match = token.value.match(/^echo\s([^\|]+?)\s*(?:\s*\|\s*(.+))?$/);
+
+        if (!match) {
+            console.log(`[Template] Invalid echo line ${token.line} column ${token.column}`);
+
+            return;
+        }
+
+        let [, name, filter] = match;
+
+        let value = this.evaluate(name, ctx);
+
+        // Apply Filters
+        if (filter !== undefined) {
+            value = this.parseFilter(value, filter, ctx);
+        }
+
+        stack.push({
+            type: 'output',
+            output: value
+        });
+    }
+
     handleCycle(token, stack, ctx, index) {
         let match = token.value.match(/^cycle\s(.*)/);
 

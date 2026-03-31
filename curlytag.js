@@ -1042,7 +1042,7 @@ class CurlyTag {
         stack.push({
             type: 'capture',
             filter: match[1],
-            output: ''
+            value: ''
         });
     }
 

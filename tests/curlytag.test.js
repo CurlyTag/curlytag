@@ -108,7 +108,7 @@ describe('CurlyTag', () => {
                 expect(template.parse('{{ items | last }}', data)).toBe('30');
             });
 
-            test.fails('length', () => {
+            test('length', () => {
                 expect(template.parse('{{ items | length }}', { items: [1, 2, 3] })).toBe('3');
             });
         });

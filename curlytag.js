@@ -186,7 +186,7 @@ class CurlyTag {
                 });
             },
             length: (value) => {
-                return typeof value === 'array' || typeof value === 'string' ? value.length : 0;
+                return Array.isArray(value) || typeof value === 'string' ? value.length : 0;
             },
             offset: (value, offset) => {
                 return value.slice(offset);

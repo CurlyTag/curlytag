@@ -2,8 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vite-plus/test';
 import { template } from '#curlytag';
 
-const fixture = (name) =>
-    readFileSync(new URL(`fixtures/${name}`, import.meta.url), 'utf-8');
+const fixture = (name) => readFileSync(new URL(`fixtures/${name}`, import.meta.url), 'utf-8');
 
 describe('CurlyTag - multi-line templates', () => {
     describe('product card', () => {

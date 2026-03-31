@@ -279,6 +279,16 @@ vp fmt            # Format only
 vp test           # Run tests once
 ```
 
+### Playground
+
+Run the playground in development mode:
+
+```bash
+vp dev
+```
+
+Vite serves the playground from `playground/` using the config in `vite.config.ts`. Open the local URL printed by the command to work on the editors and examples.
+
 ### Development Workflow
 
 Run tests in watch mode — tests re-run automatically on file changes:

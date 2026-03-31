@@ -108,8 +108,6 @@ describe('CurlyTag', () => {
                 expect(template.parse('{{ items | last }}', data)).toBe('30');
             });
 
-            // `typeof value === 'array'` is never true in JS, so this always returns 0.
-            // One-liner fix: Array.isArray(value). Not touching the library for now.
             test.fails('length', () => {
                 expect(template.parse('{{ items | length }}', { items: [1, 2, 3] })).toBe('3');
             });
@@ -176,17 +174,17 @@ describe('CurlyTag', () => {
         });
     });
 
-    describe('set', () => {
-        test.fails('sets a variable in context', () => {
-            expect(template.parse('{% set x = 42 %}{{ x }}')).toBe('42');
+    describe('assign', () => {
+        test('sets a variable in context', () => {
+            expect(template.parse('{% assign x = 42 %}{{ x }}')).toBe('42');
         });
 
-        test.fails('with filter', () => {
-            expect(template.parse('{% set name = "alice" | upper %}{{ name }}')).toBe('ALICE');
+        test('with filter', () => {
+            expect(template.parse('{% assign name = "alice" | upper %}{{ name }}')).toBe('ALICE');
         });
 
         test('invalid syntax is silently ignored', () => {
-            expect(template.parse('{% set %}rest')).toBe('rest');
+            expect(template.parse('{% assign %}rest')).toBe('rest');
         });
     });
 
@@ -210,9 +208,6 @@ describe('CurlyTag', () => {
             expect(template.parse(tpl, { a: false, b: true })).toBe('B');
         });
 
-        // When the regex in handleIf fails (no condition given), the handler returns early
-        // without jumping - but token.end was never set anyway since the tokenizer only sets
-        // it when both open and close tags are matched. Body renders regardless.
         test.fails('invalid syntax is silently ignored', () => {
             expect(template.parse('{% if %}yes{% endif %}')).toBe('');
         });
@@ -225,9 +220,6 @@ describe('CurlyTag', () => {
             ).toBe('visible');
         });
 
-        // `unless` is in this.handler but not in this.openclose, so tokenize() never
-        // sets token.end on it. handleUnless tries `return token.end` to skip the block,
-        // but gets undefined - falls through to index++.
         test.fails('skips when condition is truthy', () => {
             expect(
                 template.parse('{% unless hidden %}visible{% endunless %}', { hidden: true }),
@@ -278,9 +270,6 @@ describe('CurlyTag', () => {
             expect(template.parse(tpl, { nums: [1, 2, 3] })).toBe('13');
         });
 
-        // handleBreak declares `let top = {}` before the loop, then re-declares
-        // `let top = stack[i]` inside - so the outer `top` stays `{}` and `top.end`
-        // is undefined. Loop never stops. Classic shadowing bug.
         test.fails('break exits the loop', () => {
             const tpl =
                 '{% for n in nums %}{% if n == 3 %}{% break %}{% endif %}{{ n }}{% endfor %}';
@@ -316,19 +305,6 @@ describe('CurlyTag', () => {
         });
     });
 
-    describe('switch / case', () => {
-        test.fails('matches correct case', () => {
-            const tpl =
-                '{% switch color %}{% case "red" %}R{% case "green" %}G{% case "blue" %}B{% endswitch %}';
-            expect(template.parse(tpl, { color: 'green' })).toBe('G');
-        });
-
-        test.fails('else as default case', () => {
-            const tpl = '{% switch color %}{% case "red" %}R{% else %}?{% endswitch %}';
-            expect(template.parse(tpl, { color: 'purple' })).toBe('?');
-        });
-    });
-
     describe('comment', () => {
         test('block comment is stripped', () => {
             expect(template.parse('A{% comment %}hidden{% endcomment %}B')).toBe('AB');
@@ -350,11 +326,113 @@ describe('CurlyTag', () => {
         });
     });
 
-    describe('block', () => {
-        test('captures content into a variable', () => {
-            expect(template.parse('{% block greeting %}Hello!{% endblock %}{{ greeting }}')).toBe(
-                'Hello!',
-            );
+    describe('case / when / endcase', () => {
+        test('matches correct when branch', () => {
+            const tpl =
+                '{% case color %}{% when "red" %}R{% when "green" %}G{% when "blue" %}B{% endcase %}';
+            expect(template.parse(tpl, { color: 'green' })).toBe('G');
+        });
+
+        test('non-matching produces no output', () => {
+            const tpl = '{% case color %}{% when "red" %}R{% when "green" %}G{% endcase %}';
+            expect(template.parse(tpl, { color: 'blue' })).toBe('');
+        });
+
+        test('else acts as default branch', () => {
+            const tpl = '{% case color %}{% when "red" %}R{% else %}?{% endcase %}';
+            expect(template.parse(tpl, { color: 'purple' })).toBe('?');
+        });
+
+        test('when accepts multiple values', () => {
+            const tpl = '{% case color %}{% when "red", "crimson" %}R{% endcase %}';
+            expect(template.parse(tpl, { color: 'crimson' })).toBe('R');
+        });
+    });
+
+    describe('capture', () => {
+        test('stores block content in a variable', () => {
+            expect(
+                template.parse('{% capture msg %}Hello!{% endcapture %}{{ msg }}'),
+            ).toBe('Hello!');
+        });
+
+        test('captured variable is available after the block', () => {
+            const tpl =
+                '{% capture greeting %}Hi {% capture name %}World{% endcapture %}{% endcapture %}{{ greeting }}{{ name }}';
+            expect(template.parse(tpl)).toBe('Hi World');
+        });
+    });
+
+    describe('addFilter', () => {
+        test('registers and applies a custom filter', () => {
+            template.addFilter('shout', (v) => v + '!!!');
+            expect(template.parse('{{ msg | shout }}', { msg: 'hello' })).toBe('hello!!!');
+        });
+
+        test('custom filter with argument', () => {
+            template.addFilter('repeat', (v, n) => v.repeat(n));
+            expect(template.parse('{{ char | repeat: 3 }}', { char: 'ha' })).toBe('hahaha');
+        });
+
+        test('custom filter chains with built-in filters', () => {
+            template.addFilter('exclaim', (v) => v + '!');
+            expect(template.parse('{{ msg | upper | exclaim }}', { msg: 'hi' })).toBe('HI!');
+        });
+    });
+
+    describe('echo', () => {
+        test('outputs a variable', () => {
+            expect(template.parse('{% echo greeting %}!', { greeting: 'hello' })).toBe('hello!');
+        });
+
+        test('outputs a literal string', () => {
+            expect(template.parse('say: {% echo "world" %}!', {})).toBe('say: world!');
+        });
+
+        test('outputs with filter', () => {
+            expect(template.parse('{% echo name | upper %}!', { name: 'alice' })).toBe('ALICE!');
+        });
+
+        test.fails('outputs when echo is the last token in the template', () => {
+            expect(template.parse('{% echo greeting %}', { greeting: 'hello' })).toBe('hello');
+        });
+    });
+
+    describe('cycle', () => {
+        test.fails('cycles through values on each call', () => {
+            const tpl =
+                '{% for x in items %}{% cycle "odd", "even" %}{% endfor %}';
+            expect(template.parse(tpl, { items: [1, 2, 3] })).toBe('oddevenodd');
+        });
+    });
+
+    describe('filter / endfilter', () => {
+        test.fails('applies a filter to a block of content', () => {
+            expect(template.parse('{% filter upper %}hello{% endfilter %}text')).toBe('HELLOtext');
+        });
+
+        test.fails('filter block with chained built-in filter', () => {
+            expect(
+                template.parse('{% filter upper %}alice{% endfilter %}text'),
+            ).toBe('ALICEtext');
+        });
+    });
+
+    describe('whitespace control', () => {
+        test.fails('leading dash {{- trims leading whitespace from value', () => {
+            expect(template.parse('{{- name }}', { name: '  hello' })).toBe('hello');
+        });
+
+        test.fails('trailing dash -}} trims trailing whitespace from value', () => {
+            expect(template.parse('{{ name -}}', { name: 'hello  ' })).toBe('hello');
+        });
+    });
+
+    describe('render (Node.js)', () => {
+        test.fails('render() loads a template file in Node.js', async () => {
+            template.addPath('playground/');
+            const result = await template.render('examples/loop/template', { items: ['a', 'b', 'c'] });
+            expect(result).not.toBe('');
         });
     });
 });

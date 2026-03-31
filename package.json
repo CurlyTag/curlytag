@@ -36,19 +36,17 @@
     "test": "vp test",
     "prepare": "vp config"
   },
-  "dependencies": {
+  "devDependencies": {
     "@codemirror/lang-html": "^6.4.11",
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.40.0",
     "@fontsource-variable/martian-mono": "^5.2.7",
+    "@vitest/ui": "^4.1.2",
     "codemirror": "^6.0.2",
     "remixicon": "^4.9.1",
-    "shiki": "^4.0.2"
-  },
-  "devDependencies": {
-    "@vitest/ui": "^4.1.2",
-    "vite-plus": "^0.1.14"
+    "shiki": "^4.0.2",
+    "vite-plus": "^0.1.15"
   },
   "packageManager": "npm@11.12.1"
 }

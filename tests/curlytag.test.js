@@ -270,10 +270,21 @@ describe('CurlyTag', () => {
             expect(template.parse(tpl, { nums: [1, 2, 3] })).toBe('13');
         });
 
-        test.fails('break exits the loop', () => {
+        test('break exits the loop', () => {
             const tpl =
                 '{% for n in nums %}{% if n == 3 %}{% break %}{% endif %}{{ n }}{% endfor %}';
             expect(template.parse(tpl, { nums: [1, 2, 3, 4] })).toBe('12');
+        });
+
+        test('break on first iteration produces empty output', () => {
+            const tpl = '{% for n in nums %}{% break %}{{ n }}{% endfor %}';
+            expect(template.parse(tpl, { nums: [1, 2, 3] })).toBe('');
+        });
+
+        test('break only exits the inner loop', () => {
+            const tpl =
+                '{% for i in outer %}{% for j in inner %}{% if j == 2 %}{% break %}{% endif %}{{ i }}.{{ j }} {% endfor %}{% endfor %}';
+            expect(template.parse(tpl, { outer: [1, 2], inner: [1, 2, 3] })).toBe('1.1 2.1 ');
         });
 
         test('if inside for', () => {

@@ -894,11 +894,9 @@ class CurlyTag {
         let top = {};
 
         for (let i = stack.length - 1; i >= 0; i--) {
-            let top = stack[i];
+            top = stack[i];
 
             if (top.type == 'for') {
-                top = stack[i];
-
                 break;
             }
 

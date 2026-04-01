@@ -2,9 +2,9 @@
   "name": "CurlyTag",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
   "remoteEnv": {
-    "PATH": "${containerEnv:HOME}/.vite-plus/bin:${containerEnv:PATH}"
+    "PATH": "${containerEnv:HOME}/.vite-plus/bin:${containerEnv:HOME}/.bun/bin:${containerEnv:HOME}/.deno/bin:${containerEnv:PATH}"
   },
-  "postCreateCommand": "curl -fsSL https://vite.plus | bash && export PATH=\"$HOME/.vite-plus/bin:$PATH\" && vp install",
+  "postCreateCommand": "curl -fsSL https://vite.plus | bash && export PATH=\"$HOME/.vite-plus/bin:$PATH\" && vp install && curl -fsSL https://bun.sh/install | bash && curl -fsSL https://deno.land/install.sh | sh",
   "customizations": {
     "vscode": {
       "extensions": ["VoidZero.vite-plus-extension-pack", "EditorConfig.EditorConfig"],

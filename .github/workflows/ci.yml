@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: '24'
+          node-version: "24"
           cache: true
       - run: vp install
       - run: vp check
@@ -25,7 +25,35 @@ jobs:
       - uses: actions/checkout@v6
       - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: '24'
+          node-version: "24"
           cache: true
       - run: vp install
       - run: vp test
+
+  runtime-smoke:
+    needs: test
+    name: SSR Smoke (${{ matrix.runtime }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runtime: node
+            command: node tests/ssr-smoke.mjs
+          - runtime: bun
+            command: bun tests/ssr-smoke.mjs
+          - runtime: deno
+            command: deno run --allow-read tests/ssr-smoke.mjs
+    steps:
+      - uses: actions/checkout@v6
+      - if: matrix.runtime == 'node'
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - if: matrix.runtime == 'bun'
+        uses: oven-sh/setup-bun@v2
+      - if: matrix.runtime == 'deno'
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: ${{ matrix.command }}

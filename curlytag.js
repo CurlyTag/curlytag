@@ -1,3 +1,4 @@
+const IS_NODE = typeof process !== 'undefined' && !!process.versions?.node;
 /* OpenCart Twig replacement. Based on Django, Nunjucks template syntax. */
 class CurlyTag {
     static instance = null;
@@ -307,6 +308,18 @@ class CurlyTag {
 
             if (this.path.has(namespace)) {
                 file = this.path.get(namespace) + path.substr(path, namespace.length) + '.html';
+            }
+        }
+
+        if (IS_NODE) {
+            const fs = await import('node:fs/promises');
+
+            try {
+                return await fs.readFile(file, 'utf-8');
+            } catch {
+                console.log(`[Template] Could not load template file ${path}!`);
+
+                return '';
             }
         }
 

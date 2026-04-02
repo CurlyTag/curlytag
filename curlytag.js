@@ -590,11 +590,11 @@ class CurlyTag {
         value = this.filter.escape(value ?? '');
 
         // Trim whitespace
-        if (token.raw[3] == '-') {
+        if (token.raw[2] == '-') {
             value = value.trimStart();
         }
 
-        if (token.raw[-3] == '-') {
+        if (token.raw.at(-3) == '-') {
             value = value.trimEnd();
         }
 

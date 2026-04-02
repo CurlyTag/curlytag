@@ -70,6 +70,9 @@ class CurlyTag {
             ],
             comment: [
                 'endcomment'
+            ],
+            unless: [
+                'endunless'
             ]
         };
 

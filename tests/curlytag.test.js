@@ -220,7 +220,7 @@ describe('CurlyTag', () => {
             ).toBe('visible');
         });
 
-        test.fails('skips when condition is truthy', () => {
+        test('skips when condition is truthy', () => {
             expect(
                 template.parse('{% unless hidden %}visible{% endunless %}', { hidden: true }),
             ).toBe('');

@@ -418,14 +418,32 @@ describe('CurlyTag', () => {
     });
 
     describe('filter / endfilter', () => {
-        test.fails('applies a filter to a block of content', () => {
+        test('applies a filter to a block of content', () => {
             expect(template.parse('{% filter upper %}hello{% endfilter %}text')).toBe('HELLOtext');
         });
 
-        test.fails('filter block with chained built-in filter', () => {
-            expect(
-                template.parse('{% filter upper %}alice{% endfilter %}text'),
-            ).toBe('ALICEtext');
+        test('filter block followed by more content', () => {
+            expect(template.parse('before {% filter upper %}hello{% endfilter %} after')).toBe('before HELLO after');
+        });
+
+        test('applies lower filter to a block', () => {
+            expect(template.parse('{% filter lower %}HELLO{% endfilter %} after')).toBe('hello after');
+        });
+
+        test('applies filter to block with variable inside', () => {
+            expect(template.parse('{% filter upper %}{{ name }}{% endfilter %} end', { name: 'alice' })).toBe('ALICE end');
+        });
+
+        test('applies filter to multiline block', () => {
+            expect(template.parse('{% filter upper %}hello\nworld{% endfilter %} end')).toBe('HELLO\nWORLD end');
+        });
+
+        test('filter block with mixed static and variable content', () => {
+            expect(template.parse('{% filter upper %}hello {{ name }}{% endfilter %} end', { name: 'world' })).toBe('HELLO WORLD end');
+        });
+
+        test.fails('filter block result is lost when endfilter is the last token', () => {
+            expect(template.parse('{% filter upper %}hello{% endfilter %}')).toBe('HELLO');
         });
     });
 

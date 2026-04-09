@@ -1,3 +1,4 @@
+import { playwright } from 'vite-plus/test/browser-playwright';
 import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
@@ -20,7 +21,38 @@ export default defineConfig({
     },
     lint: {},
     test: {
-        include: ['../tests/**/*.test.js'],
+        projects: [
+            {
+                resolve: {
+                    alias: {
+                        '#curlytag': new URL('./curlytag.js', import.meta.url).pathname,
+                        '#fixtures': new URL('./tests/fixtures', import.meta.url).pathname,
+                    },
+                },
+                test: {
+                    name: 'node',
+                    include: ['../tests/**/*.test.js'],
+                    exclude: ['../tests/**/*.browser.test.js'],
+                },
+            },
+            {
+                resolve: {
+                    alias: {
+                        '#curlytag': new URL('./curlytag.js', import.meta.url).pathname,
+                    },
+                },
+                test: {
+                    name: 'browser',
+                    include: ['../tests/**/*.browser.test.js'],
+                    browser: {
+                        enabled: true,
+                        headless: true,
+                        provider: playwright(),
+                        instances: [{ browser: 'chromium' }],
+                    },
+                },
+            },
+        ],
     },
     fmt: {
         singleQuote: true,

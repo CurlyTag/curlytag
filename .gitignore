@@ -16,5 +16,9 @@ Thumbs.db
 .vite-hooks/
 dist/
 
+# VitePress
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
 # Misc
 *.log

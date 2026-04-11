@@ -35,7 +35,10 @@
     "fmt": "vp fmt",
     "test": "vp test",
     "prepare": "vp config",
-    "release": "changelogen --release"
+    "release": "changelogen --release",
+    "docs:dev": "vitepress dev docs --host",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@codemirror/lang-html": "^6.4.11",
@@ -48,10 +51,12 @@
     "@vitest/ui": "^4.1.5",
     "changelogen": "^0.6.2",
     "codemirror": "^6.0.2",
+    "oxc-minify": "^0.124.0",
     "playwright": "^1.59.1",
     "remixicon": "^4.9.1",
     "shiki": "^4.0.2",
-    "vite-plus": "^0.1.19"
+    "vite-plus": "^0.1.19",
+    "vitepress": "^2.0.0-alpha.17"
   },
   "packageManager": "npm@11.13.0"
 }

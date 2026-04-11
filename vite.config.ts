@@ -3,10 +3,12 @@ import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
     root: 'playground',
+    cacheDir: '../node_modules/.vite/playground',
     resolve: {
         alias: {
             '#curlytag': new URL('./curlytag.js', import.meta.url).pathname,
             '#fixtures': new URL('./tests/fixtures', import.meta.url).pathname,
+            '#playground': new URL('./playground', import.meta.url).pathname,
         },
     },
     build: {
@@ -14,7 +16,7 @@ export default defineConfig({
         emptyOutDir: true,
     },
     server: {
-        host: '127.0.0.1',
+        host: '0.0.0.0',
     },
     staged: {
         '*': 'vp check --fix',
@@ -33,6 +35,7 @@ export default defineConfig({
                     alias: {
                         '#curlytag': new URL('./curlytag.js', import.meta.url).pathname,
                         '#fixtures': new URL('./tests/fixtures', import.meta.url).pathname,
+                        '#playground': new URL('./playground', import.meta.url).pathname,
                     },
                 },
                 test: {
@@ -45,6 +48,7 @@ export default defineConfig({
                 resolve: {
                     alias: {
                         '#curlytag': new URL('./curlytag.js', import.meta.url).pathname,
+                        '#playground': new URL('./playground', import.meta.url).pathname,
                     },
                 },
                 test: {

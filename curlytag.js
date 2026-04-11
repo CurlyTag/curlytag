@@ -678,30 +678,46 @@ class CurlyTag {
             return;
         }
 
-        let args = this.evaluate('[' + match[1] + ']', ctx);
+        let raw = match[1].trim();
+        let group;
+        let values;
 
-        if (args.length === 0) return;
+        // Named group: {% cycle 'group': val1, val2 %}
+        // \1 back reference ensures matching quotes around group name
+        const groupMatch = raw.match(/^(['"])(.*?)\1\s*:(.*)/s);
 
+        if (groupMatch) {
+            group = groupMatch[2];
+            values = this.evaluate('[' + groupMatch[3] + ']', ctx);
+        } else {
+            // Unnamed: raw text becomes the group key
+            values = this.evaluate('[' + raw + ']', ctx);
+            group = raw;
+        }
 
-        const pos = i % arr.length;
+        // Nothing to cycle
+        if (!Array.isArray(values) || values.length === 0) {
+            return;
+        }
 
-        // Optional group name
-        // Get or initialize cycle state for this group
-        if (!ctx._cycle) ctx._cycle = {};
+        // Init cycle state
+        if (!ctx._cycle) {
+            ctx._cycle = {};
+        }
 
-        if (!this.ctx._cycle[group]) this.ctx._cycle[group] = {
-            index: -1,
+        // Start at index -1 so first increment lands on 0
+        if (!ctx._cycle[group]) {
+            ctx._cycle[group] = { index: -1 };
+        }
 
-            values
-        };
+        const state = ctx._cycle[group];
 
-        const state = this.ctx._cycle[group];
+        state.index = (state.index + 1) % values.length;
 
-        state.index = (state.index + 1) % state.values.length;
-
-        this.append(state.values[state.index]);
-
-        return;
+        stack.push({
+            type: 'output',
+            output: values[state.index]
+        });
     }
 
     /**

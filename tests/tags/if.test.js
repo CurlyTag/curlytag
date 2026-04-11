@@ -44,4 +44,44 @@ describe('if / elseif / else', () => {
             }),
         ).toBe('good');
     });
+
+    test('false elseif falls through to else', () => {
+        const tpl = '{% if a %}A{% elseif b %}B{% else %}C{% endif %}';
+        expect(template.parse(tpl, { a: false, b: false })).toBe('C');
+    });
+
+    test('false elseif does not render its body', () => {
+        const tpl = '{% if a %}A{% elseif b %}B{% endif %}';
+        expect(template.parse(tpl, { a: false, b: false })).toBe('');
+    });
+
+    test('nested if inside elseif does not leak', () => {
+        const tpl = '{% if a %}A{% elseif b %}{% if c %}C{% endif %}B{% else %}D{% endif %}';
+        expect(template.parse(tpl, { a: false, b: false, c: true })).toBe('D');
+    });
+
+    test('already active if skips all elseif and else', () => {
+        const tpl = '{% if a %}A{% elseif b %}B{% else %}C{% endif %}';
+        expect(template.parse(tpl, { a: true, b: true })).toBe('A');
+    });
+
+    describe('multiple elseif branches', () => {
+        const tpl = '{% if a %}A{% elseif b %}B{% elseif c %}C{% else %}D{% endif %}';
+
+        test('picks the if branch when first condition is true', () => {
+            expect(template.parse(tpl, { a: true, b: true, c: true })).toBe('A');
+        });
+
+        test('picks the first elseif branch', () => {
+            expect(template.parse(tpl, { a: false, b: true, c: true })).toBe('B');
+        });
+
+        test('picks the second elseif branch', () => {
+            expect(template.parse(tpl, { a: false, b: false, c: true })).toBe('C');
+        });
+
+        test('falls through to else when all conditions are false', () => {
+            expect(template.parse(tpl, { a: false, b: false, c: false })).toBe('D');
+        });
+    });
 });

@@ -101,11 +101,7 @@ describe('CurlyTag - multi-line templates', () => {
             expect(result).not.toContain('Administrator');
         });
 
-        // The openclose stack in the tokenizer doesn't account for nesting depth:
-        // the inner `elseif` closes the outer `if`'s entry prematurely, so both
-        // the elseif and else branches render regardless of the condition.
-        // Fixing this properly needs a refactor of the tokenizer - not doing that here.
-        test.fails('regular user', () => {
+        test('regular user', () => {
             const result = template.parse(tpl, {
                 user: {
                     name: 'Guest',

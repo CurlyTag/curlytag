@@ -842,6 +842,10 @@ class CurlyTag {
 
         // If any previous not active tags then set current tag to false;
         top.active = this.evaluate(match[1], ctx);
+
+        if (!top.active) {
+            return token.end;
+        }
     }
 
     handleElse(token, stack, ctx, index) {

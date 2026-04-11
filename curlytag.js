@@ -715,7 +715,9 @@ class CurlyTag {
         if (!match) {
             console.log(`[Template] Invalid 'if' syntax line ${token.line} column ${token.column}`);
 
-            return;
+            stack.push({ type: 'if', active: true });
+
+            return token.end;
         }
 
         // Check to see if a previous tag is inactive

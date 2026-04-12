@@ -198,8 +198,8 @@ class CurlyTag {
             limit: (value, limit) => {
                 return value.slice(0, limit);
             },
-            sum: (value, amount) => {
-                return value.reduce((amount, value) => amount + value, 0);
+            sum: (value, amount = 0) => {
+                return value.reduce((accumulator, currentValue) => accumulator + currentValue, amount);
             },
             push: (value, item) => {
                 value.push(item);

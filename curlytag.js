@@ -234,7 +234,7 @@ class CurlyTag {
                 return value; // fallback: return unchanged
             },
             select: (value, key) => {
-                value.filter((item) => item[key]);
+                return value.filter((item) => item[key]);
             },
             reject: (value, key) => {
                 value.filter((item) => !item[key]);

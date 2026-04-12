@@ -240,7 +240,7 @@ class CurlyTag {
                 return value.filter((item) => item[key]);
             },
             reject: (value, key) => {
-                value.filter((item) => !item[key]);
+                return value.filter((item) => !item[key]);
             },
             first: (value) => {
                 return value[0] !== undefined ? value[0] : [];

@@ -211,7 +211,10 @@ class CurlyTag {
                 value.shift();
             },
             unshift: (value, item) => {
-                value.unshift(item);
+                const copy = [...value];
+                copy.unshift(item);
+
+                return copy;
             },
             slice: (value, start, end) => {
                 return length !== undefined ? value.slice(start, end) : value.slice(start);

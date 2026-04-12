@@ -432,8 +432,40 @@ describe('CurlyTag', () => {
             expect(template.parse('{% echo name | upper %}!', { name: 'alice' })).toBe('ALICE!');
         });
 
-        test.fails('outputs when echo is the last token in the template', () => {
+        test('outputs when echo is the last token in the template', () => {
             expect(template.parse('{% echo greeting %}', { greeting: 'hello' })).toBe('hello');
+        });
+
+        test('outputs a number when echo is last', () => {
+            expect(template.parse('{% echo count %}', { count: 42 })).toBe('42');
+        });
+
+        test('outputs with filter when echo is last', () => {
+            expect(template.parse('{% echo name | upper %}', { name: 'alice' })).toBe('ALICE');
+        });
+
+        test('outputs empty string for undefined variable when echo is last', () => {
+            expect(template.parse('{% echo missing %}')).toBe('');
+        });
+
+        test('outputs zero when echo is last', () => {
+            expect(template.parse('{% echo n %}', { n: 0 })).toBe('0');
+        });
+
+        test('outputs false when echo is last', () => {
+            expect(template.parse('{% echo b %}', { b: false })).toBe('false');
+        });
+
+        test('outputs zero when echo is followed by a tag', () => {
+            expect(template.parse('{% echo n %}{% if true %}yes{% endif %}', { n: 0 })).toBe('0yes');
+        });
+
+        test('outputs false when echo is followed by a tag', () => {
+            expect(template.parse('{% echo b %}{% if true %}yes{% endif %}', { b: false })).toBe('falseyes');
+        });
+
+        test('outputs prefix + echo when echo is not last', () => {
+            expect(template.parse('prefix: {% echo greeting %}!', { greeting: 'hello' })).toBe('prefix: hello!');
         });
     });
 
@@ -470,8 +502,24 @@ describe('CurlyTag', () => {
             expect(template.parse('{% filter upper %}hello {{ name }}{% endfilter %} end', { name: 'world' })).toBe('HELLO WORLD end');
         });
 
-        test.fails('filter block result is lost when endfilter is the last token', () => {
+        test('filter block result preserved when endfilter is the last token', () => {
             expect(template.parse('{% filter upper %}hello{% endfilter %}')).toBe('HELLO');
+        });
+
+        test('lower filter block as last token', () => {
+            expect(template.parse('{% filter lower %}WORLD{% endfilter %}')).toBe('world');
+        });
+
+        test('filter block with variable as last token', () => {
+            expect(template.parse('{% filter upper %}{{ name }}{% endfilter %}', { name: 'alice' })).toBe('ALICE');
+        });
+
+        test('prefix + filter block as last token', () => {
+            expect(template.parse('prefix{% filter upper %}hello{% endfilter %}')).toBe('prefixHELLO');
+        });
+
+        test('filter block followed by more content is unchanged', () => {
+            expect(template.parse('{% filter upper %}hello{% endfilter %} world')).toBe('HELLO world');
         });
     });
 

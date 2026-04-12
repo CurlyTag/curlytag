@@ -400,7 +400,7 @@ class CurlyTag {
                 code = '';
             }
 
-            if (code) {
+            if (code != null && code !== '') {
                 output += code;
             }
 
@@ -421,6 +421,14 @@ class CurlyTag {
             }
 
             index++;
+        }
+
+        // Flush any pending output left on the stack when a tag that produces
+        // output (echo, endfilter, include) is the very last token in the template.
+        let pending = stack[stack.length - 1];
+
+        if (pending?.type === 'output' && pending.output != null) {
+            output += pending.output;
         }
 
         return output;

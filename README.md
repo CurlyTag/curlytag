@@ -279,6 +279,17 @@ vp fmt            # Format only
 vp test           # Run tests once
 ```
 
+### Test Layout
+
+Tests are organized by feature and should stay split across small files instead of growing a shared catch-all suite.
+
+- `tests/output/` contains plain output and `{{ }}` variable rendering tests.
+- `tests/filters/` contains filter tests, with array filters in `tests/filters/array/`.
+- `tests/tags/` contains tag behavior tests.
+- `tests/render.test.js` and `tests/add-filter.test.js` stay at the top level because they cover broader integration behavior.
+
+When adding a new filter or tag, prefer creating or extending a focused file in the matching directory rather than restoring cases to a monolithic `curlytag.test.js` file.
+
 ### Playground
 
 Run the playground in development mode:

@@ -7,7 +7,9 @@ describe('shift', () => {
     });
 
     test('decreases length by one', () => {
-        expect(template.parse('{{ items | shift | length }}', { items: ['a', 'b', 'c'] })).toBe('2');
+        expect(template.parse('{{ items | shift | length }}', { items: ['a', 'b', 'c'] })).toBe(
+            '2',
+        );
     });
 
     test('on single-element array returns empty', () => {

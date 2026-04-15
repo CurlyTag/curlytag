@@ -19,7 +19,13 @@ export default defineConfig({
     staged: {
         '*': 'vp check --fix',
     },
-    lint: {},
+    lint: {
+        ignorePatterns: ['docs/.vitepress/cache/**'],
+        rules: {
+            eqeqeq: 'off',
+            'no-with': 'off',
+        },
+    },
     test: {
         projects: [
             {
@@ -55,7 +61,15 @@ export default defineConfig({
         ],
     },
     fmt: {
+        tabWidth: 4,
         singleQuote: true,
-        ignorePatterns: ['**/*.md', 'playground/examples/**/template.html'],
+        ignorePatterns: [
+            '**/*.md',
+            '**/*.yml',
+            '**/*.yaml',
+            '**/*.json',
+            'playground/examples/**/template.html',
+            'docs/.vitepress/cache/**',
+        ],
     },
 });

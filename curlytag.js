@@ -205,7 +205,10 @@ class CurlyTag {
                 value.push(item);
             },
             pop: (value) => {
-                value.pop();
+                const copy = [...value];
+                copy.pop();
+
+                return copy;
             },
             shift: (value) => {
                 const copy = [...value];

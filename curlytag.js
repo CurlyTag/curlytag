@@ -202,7 +202,10 @@ class CurlyTag {
                 return value.reduce((amount, value) => amount + value, 0);
             },
             push: (value, item) => {
-                value.push(item);
+                const copy = [...value];
+                copy.push(item);
+
+                return copy;
             },
             pop: (value) => {
                 const copy = [...value];

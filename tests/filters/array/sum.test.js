@@ -27,6 +27,8 @@ describe('sum', () => {
     });
 
     test('with floating point numbers', () => {
-        expect(template.parse('{{ items | sum }}', { items: [0.1, 0.2] })).toBe('0.30000000000000004');
+        expect(template.parse('{{ items | sum }}', { items: [0.1, 0.2] })).toBe(
+            '0.30000000000000004',
+        );
     });
 });

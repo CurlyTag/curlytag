@@ -226,7 +226,7 @@ class CurlyTag {
                 return copy;
             },
             slice: (value, start, end) => {
-                return length !== undefined ? value.slice(start, end) : value.slice(start);
+                return end !== undefined ? value.slice(start, end) : value.slice(start);
             },
             join: (value, seperator = ' ') => {
                 return value.join(seperator);

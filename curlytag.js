@@ -322,7 +322,7 @@ class CurlyTag {
             }
 
             if (this.path.has(namespace)) {
-                file = this.path.get(namespace) + path.substr(path, namespace.length) + '.html';
+                file = this.path.get(namespace) + path.substr(namespace.length) + '.html';
             }
         }
 

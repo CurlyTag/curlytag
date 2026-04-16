@@ -177,7 +177,7 @@ class CurlyTag {
                 return value.concat(...args);
             },
             groupby: (value, type) => {
-                return Object.groupBy(value, ({ type }) => type);
+                return Object.groupBy(value, (item) => item[type]);
             },
             sort: (value, key = null, direction = 'asc') => {
                 const dir = direction === 'desc' ? -1 : 1;

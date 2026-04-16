@@ -108,4 +108,25 @@ describe('for', () => {
     test('for without else still works when empty', () => {
         expect(template.parse('{% for x in items %}{{ x }}{% endfor %}', { items: [] })).toBe('');
     });
+
+    test('null variable produces no output', () => {
+        expect(template.parse('{% for x in items %}{{ x }}{% endfor %}', { items: null })).toBe('');
+    });
+
+    test('null variable does not crash', () => {
+        expect(() =>
+            template.parse('{% for x in items %}{{ x }}{% endfor %}', { items: null }),
+        ).not.toThrow();
+    });
+
+    test('false variable produces no output', () => {
+        expect(template.parse('{% for x in items %}{{ x }}{% endfor %}', { items: false })).toBe(
+            '',
+        );
+    });
+
+    test('null variable renders else branch', () => {
+        const tpl = '{% for x in items %}{{ x }}{% else %}empty{% endfor %}';
+        expect(template.parse(tpl, { items: null })).toBe('empty');
+    });
 });

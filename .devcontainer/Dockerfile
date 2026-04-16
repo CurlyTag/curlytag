@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/javascript-node:24
 
-RUN npx playwright install chromium --with-deps
+RUN npx playwright install-deps chromium
 
 USER node
 

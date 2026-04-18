@@ -969,7 +969,7 @@ class CurlyTag {
     }
 
     handleCase(token, stack, ctx, index) {
-        let match = token.value.match(/^case\s(\w+)$/);
+        let match = token.value.match(/^case\s([\w.]+)$/);
 
         if (!match) {
             console.log(`[Template] Invalid 'case' syntax line ${token.line} column ${token.column}`);

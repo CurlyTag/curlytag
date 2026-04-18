@@ -27,4 +27,42 @@ describe('string', () => {
             'AL.',
         );
     });
+
+    test('striptag removes basic html tags', () => {
+        expect(template.parse('{{ html | striptag }}', { html: '<p>hello</p>' })).toBe('hello');
+    });
+
+    test('striptag removes script block including contents', () => {
+        expect(
+            template.parse('{{ html | striptag }}', { html: "<script>alert('xss')</script>hello" }),
+        ).toBe('hello');
+    });
+
+    test('striptag removes style block including contents', () => {
+        expect(
+            template.parse('{{ html | striptag }}', {
+                html: '<style>body{color:red}</style>hello',
+            }),
+        ).toBe('hello');
+    });
+
+    test('striptag removes html comments', () => {
+        expect(template.parse('{{ html | striptag }}', { html: '<!-- comment -->hello' })).toBe(
+            'hello',
+        );
+    });
+
+    test('striptag leaves plain text untouched', () => {
+        expect(template.parse('{{ html | striptag }}', { html: 'just text' })).toBe('just text');
+    });
+
+    test('striptag removes multiline script with attributes including contents', () => {
+        const html = '<script type="module">\nconsole.log("hi");\n</script>hello';
+        expect(template.parse('{{ html | striptag }}', { html })).toBe('hello');
+    });
+
+    test('striptag removes multiline style with attributes including contents', () => {
+        const html = '<style type="text/css">\nbody { color: red; }\n</style>hello';
+        expect(template.parse('{{ html | striptag }}', { html })).toBe('hello');
+    });
 });

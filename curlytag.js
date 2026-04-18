@@ -109,7 +109,7 @@ class CurlyTag {
             },
             striptag: (value) => {
                 // Remove all tags, including <style>, <script>, comments, etc.
-                return value.replace(/<[^>]*>/g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/<\s*script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<\s*style[^>]*>[\s\S]*?<\/style>/gi, '').trim();
+                return value.replace(/<\s*script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<\s*style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '').trim();
             },
             // String
             lower: (value) => {

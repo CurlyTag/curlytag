@@ -129,4 +129,54 @@ describe('for', () => {
         const tpl = '{% for x in items %}{{ x }}{% else %}empty{% endfor %}';
         expect(template.parse(tpl, { items: null })).toBe('empty');
     });
+
+    test('break outside loop is a no-op', () => {
+        expect(template.parse('before{% break %}after')).toBe('beforeafter');
+    });
+
+    test('break outside loop does not corrupt if/else', () => {
+        expect(template.parse('{% if true %}{% break %}{% else %}hidden{% endif %}result')).toBe(
+            'result',
+        );
+    });
+
+    test('break outside loop does not corrupt elseif', () => {
+        expect(
+            template.parse('{% if true %}{% break %}{% elseif false %}hidden{% endif %}result'),
+        ).toBe('result');
+    });
+
+    test('break outside loop does not affect subsequent ifs', () => {
+        expect(
+            template.parse('{% break %}{% if true %}yes{% else %}no{% endif %}'),
+        ).toBe('yes');
+    });
+
+    test('break outside loop does not corrupt case', () => {
+        const tpl =
+            '{% case status %}{% when "ok" %}{% break %}OK{% when "err" %}ERR{% endcase %}';
+        expect(template.parse(tpl, { status: 'ok' })).toBe('OK');
+    });
+
+    test('continue outside loop is a no-op', () => {
+        expect(template.parse('before{% continue %}after')).toBe('beforeafter');
+    });
+
+    test('continue outside loop does not corrupt if/else', () => {
+        expect(
+            template.parse('{% if true %}{% continue %}{% else %}hidden{% endif %}result'),
+        ).toBe('result');
+    });
+
+    test('continue outside loop does not corrupt elseif', () => {
+        expect(
+            template.parse('{% if true %}{% continue %}{% elseif false %}hidden{% endif %}result'),
+        ).toBe('result');
+    });
+
+    test('continue outside loop does not corrupt case', () => {
+        const tpl =
+            '{% case status %}{% when "ok" %}{% continue %}OK{% when "err" %}ERR{% endcase %}';
+        expect(template.parse(tpl, { status: 'ok' })).toBe('OK');
+    });
 });

@@ -34,7 +34,8 @@
     "lint": "vp lint",
     "fmt": "vp fmt",
     "test": "vp test",
-    "prepare": "vp config"
+    "prepare": "vp config",
+    "release": "changelogen --release"
   },
   "devDependencies": {
     "@codemirror/lang-html": "^6.4.11",
@@ -45,6 +46,7 @@
     "@vitest/browser": "^4.1.5",
     "@vitest/browser-playwright": "^4.1.5",
     "@vitest/ui": "^4.1.5",
+    "changelogen": "^0.6.2",
     "codemirror": "^6.0.2",
     "playwright": "^1.59.1",
     "remixicon": "^4.9.1",

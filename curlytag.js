@@ -960,6 +960,11 @@ class CurlyTag {
     }
 
     handleContinue(token, stack, ctx, index) {
+        // Ignore continue when not inside a loop to avoid corrupting the if/else stack.
+        if (!stack.some(frame => frame.type === 'for')) {
+            return;
+        }
+
         for (let i = stack.length - 1; i >= 0; i--) {
             if (stack[i].type == 'for') {
                 return stack[i].end;
@@ -971,6 +976,11 @@ class CurlyTag {
     }
 
     handleBreak(token, stack, ctx, index) {
+        // Ignore break when not inside a loop to avoid corrupting the if/else stack.
+        if (!stack.some(frame => frame.type === 'for')) {
+            return;
+        }
+
         let top = {};
 
         for (let i = stack.length - 1; i >= 0; i--) {

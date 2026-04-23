@@ -7,11 +7,31 @@
 
 CurlyTag - Open Source JavaScript Template Engine
 
+## Installation
+
+**npm / Node.js**
+
+```sh
+npm install @curlytag/curlytag
+```
+
+```js
+import { template } from '@curlytag/curlytag';
+```
+
+**CDN (browser)**
+
+```html
+<script type="module">
+  import { template } from 'https://cdn.jsdelivr.net/npm/@curlytag/curlytag/curlytag.js';
+
+  template.parse('Hello, {{ name }}!', { name: 'World' });
+</script>
+```
+
 ## Quick Start
 
 ```js
-import { template } from './curlytag.js';
-
 template.parse('Hello, {{ name }}!', { name: 'World' });
 // → Hello, World!
 ```

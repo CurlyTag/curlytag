@@ -45,17 +45,16 @@ describe('case / when / endcase', () => {
     });
 
     test('three level dotted path resolves correctly', () => {
-        const tpl =
-            '{% case a.b.c.value %}{% when "x" %}X{% when "y" %}Y{% endcase %}';
+        const tpl = '{% case a.b.c.value %}{% when "x" %}X{% when "y" %}Y{% endcase %}';
         expect(template.parse(tpl, { a: { b: { c: { value: 'y' } } } })).toBe('Y');
     });
 
     test('deeply nested path with multiple when values', () => {
         const tpl =
             '{% case user.profile.settings.theme %}{% when "dark", "black" %}D{% when "light" %}L{% endcase %}';
-        expect(
-            template.parse(tpl, { user: { profile: { settings: { theme: 'black' } } } }),
-        ).toBe('D');
+        expect(template.parse(tpl, { user: { profile: { settings: { theme: 'black' } } } })).toBe(
+            'D',
+        );
     });
 
     test('dotted path with missing intermediate key produces no output', () => {

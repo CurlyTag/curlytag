@@ -147,14 +147,11 @@ describe('for', () => {
     });
 
     test('break outside loop does not affect subsequent ifs', () => {
-        expect(
-            template.parse('{% break %}{% if true %}yes{% else %}no{% endif %}'),
-        ).toBe('yes');
+        expect(template.parse('{% break %}{% if true %}yes{% else %}no{% endif %}')).toBe('yes');
     });
 
     test('break outside loop does not corrupt case', () => {
-        const tpl =
-            '{% case status %}{% when "ok" %}{% break %}OK{% when "err" %}ERR{% endcase %}';
+        const tpl = '{% case status %}{% when "ok" %}{% break %}OK{% when "err" %}ERR{% endcase %}';
         expect(template.parse(tpl, { status: 'ok' })).toBe('OK');
     });
 
@@ -163,9 +160,9 @@ describe('for', () => {
     });
 
     test('continue outside loop does not corrupt if/else', () => {
-        expect(
-            template.parse('{% if true %}{% continue %}{% else %}hidden{% endif %}result'),
-        ).toBe('result');
+        expect(template.parse('{% if true %}{% continue %}{% else %}hidden{% endif %}result')).toBe(
+            'result',
+        );
     });
 
     test('continue outside loop does not corrupt elseif', () => {

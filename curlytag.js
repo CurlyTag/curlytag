@@ -896,7 +896,7 @@ class CurlyTag {
         // Match any global function
         let items = this.evaluate(key, ctx);
 
-        if (typeof items !== 'object') {
+        if (items === null || typeof items !== 'object') {
             items = [];
         }
 

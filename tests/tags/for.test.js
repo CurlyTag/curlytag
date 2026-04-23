@@ -83,4 +83,29 @@ describe('for', () => {
     test('undefined variable produces no output', () => {
         expect(template.parse('{% for x in items %}{{ x }}{% endfor %}')).toBe('');
     });
+
+    test('else renders when array is empty', () => {
+        const tpl = '{% for x in items %}{{ x }}{% else %}empty{% endfor %}';
+        expect(template.parse(tpl, { items: [] })).toBe('empty');
+    });
+
+    test('else does not render when array has items', () => {
+        const tpl = '{% for x in items %}{{ x }}{% else %}empty{% endfor %}';
+        expect(template.parse(tpl, { items: ['a', 'b'] })).toBe('ab');
+    });
+
+    test('only one branch renders for non-empty array', () => {
+        const tpl = '{% for x in items %}{{ x }} {% else %}none{% endfor %}';
+        expect(template.parse(tpl, { items: [1, 2, 3] })).toBe('1 2 3 ');
+    });
+
+    test('content after endfor renders after else', () => {
+        const tpl = '{% for x in items %}{{ x }}{% else %}empty{% endfor %}done';
+        expect(template.parse(tpl, { items: [] })).toBe('emptydone');
+        expect(template.parse(tpl, { items: ['a'] })).toBe('adone');
+    });
+
+    test('for without else still works when empty', () => {
+        expect(template.parse('{% for x in items %}{{ x }}{% endfor %}', { items: [] })).toBe('');
+    });
 });

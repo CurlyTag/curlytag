@@ -49,7 +49,9 @@ class CurlyTag {
             ],
             else: [
                 'endif',
-                'endcase'
+                'endcase',
+                'endfor',
+                'endunless'
             ],
             when: [
                 'when',
@@ -57,6 +59,7 @@ class CurlyTag {
                 'endcase'
             ],
             for: [
+                'else',
                 'endfor'
             ],
             capture: [
@@ -72,6 +75,7 @@ class CurlyTag {
                 'endcomment'
             ],
             unless: [
+                'else',
                 'endunless'
             ]
         };
@@ -483,19 +487,34 @@ class CurlyTag {
                 // Handle Close Tags
                 let top = stack[stack.length - 1];
 
+                let forRef;
+
                 if (top && this.openclose[top.type].includes(command)) {
                     token[top.index].end = token.length;
 
-                    stack.pop();
+                    let popped = stack.pop();
+                    let closedByElse = command === 'else' && (popped.type === 'for' || popped.type === 'unless');
+                    let closedElseOfLoop = (command === 'endfor' || command === 'endunless') && popped.type === 'else' && popped.forRef !== undefined;
+
+                    if (closedByElse) {
+                        forRef = popped.index;
+                    } else if (closedElseOfLoop) {
+                        token[popped.forRef].loopEnd = token.length;
+                    }
                 }
 
                 // Handle Open Tags
                 if (command in this.openclose) {
-                    // Remember this opening tag's token index
-                    stack.push({
+                    let entry = {
                         type: command,
-                        index: token.length // current length = index before push
-                    });
+                        index: token.length
+                    };
+
+                    if (forRef !== undefined) {
+                        entry.forRef = forRef;
+                    }
+
+                    stack.push(entry);
                 }
 
                 token.push({
@@ -886,17 +905,20 @@ class CurlyTag {
             items = this.parseFilter(items, filter, ctx);
         }
 
+        let endIndex = token.loopEnd ?? token.end;
+
         stack.push({
             type: 'for',
             name: name,
             items: items,
             index: -1,
             start: index + 1,
-            end: token.end,
+            end: endIndex,
+            active: items.length > 0,
             parent: {...ctx}
         });
 
-        return token.end;
+        return items.length > 0 ? endIndex : token.end;
     }
 
     handleEndfor(token, stack, ctx, index) {

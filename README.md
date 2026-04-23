@@ -22,11 +22,21 @@ import { template } from '@curlytag/curlytag';
 **CDN (browser)**
 
 ```html
-<script type="module">
-  import { template } from 'https://cdn.jsdelivr.net/npm/@curlytag/curlytag/curlytag.js';
+<html>
+  <head>
+    <!-- preload the module so it's ready before the script runs -->
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@curlytag/curlytag/curlytag.js">
+  </head>
+  <body>
+    <!-- your content -->
 
-  template.parse('Hello, {{ name }}!', { name: 'World' });
-</script>
+    <script type="module">
+      import { template } from 'https://cdn.jsdelivr.net/npm/@curlytag/curlytag/curlytag.js';
+
+      template.parse('Hello, {{ name }}!', { name: 'World' });
+    </script>
+  </body>
+</html>
 ```
 
 ## Quick Start

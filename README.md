@@ -1,5 +1,10 @@
 # curlytag
 
+[![npm version](https://img.shields.io/npm/v/@curlytag/curlytag)](https://www.npmjs.com/package/@curlytag/curlytag)
+[![npm downloads](https://img.shields.io/npm/dm/@curlytag/curlytag)](https://www.npmjs.com/package/@curlytag/curlytag)
+[![license](https://img.shields.io/npm/l/@curlytag/curlytag)](LICENSE)
+[![CI](https://github.com/curlytag/curlytag/actions/workflows/ci.yml/badge.svg)](https://github.com/curlytag/curlytag/actions/workflows/ci.yml)
+
 CurlyTag - Open Source JavaScript Template Engine
 
 ## Quick Start

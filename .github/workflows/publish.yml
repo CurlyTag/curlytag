@@ -6,7 +6,25 @@ on:
       - 'v*'
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: '24'
+          cache: true
+      - run: vp install
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: vp exec playwright install chromium --with-deps
+      - run: vp test
+
   publish:
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -18,7 +36,6 @@ jobs:
           node-version: '24'
           cache: true
       - run: vp install
-      - run: vp test --project node
       - uses: actions/setup-node@v4
         with:
           node-version: '24'

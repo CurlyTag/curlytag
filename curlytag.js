@@ -94,6 +94,15 @@ class CurlyTag {
                     .trim();
             },
             // String
+            capitalize: (value) => {
+                let chars = [...String(value ?? '')];
+
+                if (!chars.length) {
+                    return '';
+                }
+
+                return chars[0].toUpperCase() + chars.slice(1).join('').toLowerCase();
+            },
             lower: (value) => {
                 return value.toLowerCase();
             },

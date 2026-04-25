@@ -286,10 +286,14 @@ class CurlyTag {
                 return value % amount;
             },
             at_least: (value, minimum) => {
-                return Math.max(value, minimum);
+                const number = Number(value);
+
+                return isNaN(number) ? minimum : Math.max(number, minimum);
             },
             at_most: (value, maximum) => {
-                return Math.min(value, maximum);
+                const number = Number(value);
+
+                return isNaN(number) ? maximum : Math.min(number, maximum);
             },
             // URL
             urlencode: (value) => {

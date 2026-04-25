@@ -47,6 +47,18 @@ describe('math', () => {
         test('large value is not clamped', () => {
             expect(template.parse('{{ price | at_least: 100 }}', { price: 9999 })).toBe('9999');
         });
+
+        test('non-numeric string returns minimum', () => {
+            expect(template.parse('{{ val | at_least: 0 }}', { val: 'hello' })).toBe('0');
+        });
+
+        test('undefined variable returns minimum', () => {
+            expect(template.parse('{{ val | at_least: 5 }}', {})).toBe('5');
+        });
+
+        test('numeric string is coerced and clamped', () => {
+            expect(template.parse('{{ val | at_least: 10 }}', { val: '3' })).toBe('10');
+        });
     });
 
     describe('at_most', () => {
@@ -80,6 +92,18 @@ describe('math', () => {
 
         test('negative value stays negative when below maximum', () => {
             expect(template.parse('{{ val | at_most: 0 }}', { val: -5 })).toBe('-5');
+        });
+
+        test('non-numeric string returns maximum', () => {
+            expect(template.parse('{{ val | at_most: 100 }}', { val: 'hello' })).toBe('100');
+        });
+
+        test('undefined variable returns maximum', () => {
+            expect(template.parse('{{ val | at_most: 50 }}', {})).toBe('50');
+        });
+
+        test('numeric string is coerced and clamped', () => {
+            expect(template.parse('{{ val | at_most: 10 }}', { val: '99' })).toBe('10');
         });
     });
 });

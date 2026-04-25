@@ -257,6 +257,9 @@ class CurlyTag {
             random: (value) => {
                 return value[Math.floor(Math.random() * value.length)];
             },
+            compact: (value) => {
+                return value.filter((item) => item != null);
+            },
             // Math
             plus: (value, amount) => {
                 return value + amount;

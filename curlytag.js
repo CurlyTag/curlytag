@@ -285,6 +285,12 @@ class CurlyTag {
             modulo: (value, amount) => {
                 return value % amount;
             },
+            at_least: (value, minimum) => {
+                return Math.max(value, minimum);
+            },
+            at_most: (value, maximum) => {
+                return Math.min(value, maximum);
+            },
             // URL
             urlencode: (value) => {
                 return encodeURIComponent(value);

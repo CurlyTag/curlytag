@@ -87,6 +87,9 @@ class CurlyTag {
             strip_newlines: (value) => {
                 return String(value ?? '').replace(/\r\n|\r|\n/g, '');
             },
+            normalize_whitespace: (value) => {
+                return String(value ?? '').replace(/\s+/g, ' ').trim();
+            },
             striptag: (value) => {
                 // Remove all tags, including <style>, <script>, comments, etc.
                 return value

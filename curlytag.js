@@ -121,6 +121,38 @@ class CurlyTag {
             replace_first: (value, search, replace = '') => {
                 return value.replace(search, replace);
             },
+            remove: (value, search) => {
+                const string = String(value ?? '');
+                const searchString = String(search);
+
+                if (!searchString) {
+                    return string;
+                }
+
+                return string.split(searchString).join('');
+            },
+            remove_first: (value, search) => {
+                const string = String(value ?? '');
+                const searchString = String(search);
+                const index = string.indexOf(searchString);
+
+                if (index === -1) {
+                    return string;
+                }
+
+                return string.slice(0, index) + string.slice(index + searchString.length);
+            },
+            remove_last: (value, search) => {
+                const string = String(value ?? '');
+                const searchString = String(search);
+                const index = string.lastIndexOf(searchString);
+
+                if (index === -1) {
+                    return string;
+                }
+
+                return string.slice(0, index) + string.slice(index + searchString.length);
+            },
             split: (value, separator) => {
                 return value.split(separator);
             },

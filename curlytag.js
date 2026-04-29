@@ -326,6 +326,27 @@ class CurlyTag {
             join: (value, seperator = ' ') => {
                 return value.join(seperator);
             },
+            array_to_sentence_string: (value, connector = 'and') => {
+                const items = Array.isArray(value)
+                    ? value.map((item) => String(item ?? '')).filter((item) => item !== '')
+                    : [];
+
+                const word = String(connector ?? 'and');
+
+                if (items.length === 0) {
+                    return '';
+                }
+
+                if (items.length === 1) {
+                    return items[0];
+                }
+
+                if (items.length === 2) {
+                    return `${items[0]} ${word} ${items[1]}`;
+                }
+
+                return `${items.slice(0, -1).join(', ')}, ${word} ${items[items.length - 1]}`;
+            },
             reverse: (value) => {
                 if (Array.isArray(value)) {
                     return [...value].reverse();

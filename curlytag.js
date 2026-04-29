@@ -81,6 +81,16 @@ class CurlyTag {
                         })[m] || m,
                 );
             },
+            escape_once: (value) => {
+                const unescaped = String(value ?? '')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'");
+
+                return this.filter.escape(unescaped);
+            },
             nl2br: (value) => {
                 return String(value).replace(/\n/g, '<br/>');
             },

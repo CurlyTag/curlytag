@@ -269,6 +269,9 @@ class CurlyTag {
             uniq: (value) => {
                 return [...new Set(value)];
             },
+            map: (value, property) => {
+                return value.map((item) => item?.[property]);
+            },
             // Math
             plus: (value, amount) => {
                 return value + amount;

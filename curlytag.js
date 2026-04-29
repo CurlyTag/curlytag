@@ -385,6 +385,22 @@ class CurlyTag {
             urldecode: (value) => {
                 return decodeURIComponent(value);
             },
+            base64_encode: (value) => {
+                const bytes = new TextEncoder().encode(String(value ?? ''));
+                const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('');
+
+                return btoa(binary);
+            },
+            base64_decode: (value) => {
+                try {
+                    const binary = atob(String(value ?? ''));
+                    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+
+                    return new TextDecoder().decode(bytes);
+                } catch {
+                    return '';
+                }
+            },
         };
     }
 

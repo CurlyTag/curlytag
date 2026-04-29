@@ -266,6 +266,9 @@ class CurlyTag {
             compact: (value) => {
                 return value.filter((item) => item != null);
             },
+            uniq: (value) => {
+                return [...new Set(value)];
+            },
             // Math
             plus: (value, amount) => {
                 return value + amount;

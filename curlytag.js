@@ -294,6 +294,9 @@ class CurlyTag {
             modulo: (value, amount) => {
                 return value % amount;
             },
+            to_integer: (value) => {
+                return parseInt(value, 10);
+            },
             at_least: (value, minimum) => {
                 const number = Number(value);
 

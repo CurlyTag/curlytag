@@ -84,6 +84,9 @@ class CurlyTag {
             nl2br: (value) => {
                 return String(value).replace(/\n/g, '<br/>');
             },
+            strip_newlines: (value) => {
+                return String(value ?? '').replace(/\r\n|\r|\n/g, '');
+            },
             striptag: (value) => {
                 // Remove all tags, including <style>, <script>, comments, etc.
                 return value

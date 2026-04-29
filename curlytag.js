@@ -205,6 +205,22 @@ class CurlyTag {
 
                 return value.substring(0, length - end.length) + end;
             },
+            truncatewords: (value, count = 15, end = '...') => {
+                const string = String(value ?? '').trim();
+                const limit = Number(count);
+
+                if (!string || !Number.isFinite(limit) || limit <= 0) {
+                    return '';
+                }
+
+                const words = string.split(/\s+/);
+
+                if (words.length <= limit) {
+                    return string;
+                }
+
+                return words.slice(0, limit).join(' ') + String(end ?? '');
+            },
             wordcount: (value) => {
                 let string = String(value).trim();
 

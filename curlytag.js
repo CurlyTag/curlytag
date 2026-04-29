@@ -116,10 +116,39 @@ class CurlyTag {
                 return value.toUpperCase();
             },
             replace: (value, search, replace = '') => {
-                return value.replaceAll(search, replace);
+                const string = String(value ?? '');
+                const searchString = String(search);
+                const replaceString = String(replace);
+
+                if (!searchString) {
+                    return string;
+                }
+
+                return string.split(searchString).join(replaceString);
             },
             replace_first: (value, search, replace = '') => {
-                return value.replace(search, replace);
+                const string = String(value ?? '');
+                const searchString = String(search);
+                const replaceString = String(replace);
+                const index = string.indexOf(searchString);
+
+                if (index === -1) {
+                    return string;
+                }
+
+                return string.slice(0, index) + replaceString + string.slice(index + searchString.length);
+            },
+            replace_last: (value, search, replace = '') => {
+                const string = String(value ?? '');
+                const searchString = String(search);
+                const replaceString = String(replace);
+                const index = string.lastIndexOf(searchString);
+
+                if (index === -1) {
+                    return string;
+                }
+
+                return string.slice(0, index) + replaceString + string.slice(index + searchString.length);
             },
             remove: (value, search) => {
                 const string = String(value ?? '');

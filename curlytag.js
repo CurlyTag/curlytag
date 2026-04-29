@@ -222,8 +222,12 @@ class CurlyTag {
                     );
                 });
             },
-            length: (value) => {
+            size: (value) => {
                 return Array.isArray(value) || typeof value === 'string' ? value.length : 0;
+            },
+            // alias for size (Twig compat)
+            length: (value) => {
+                return this.filter.size(value);
             },
             offset: (value, offset) => {
                 return value.slice(offset);

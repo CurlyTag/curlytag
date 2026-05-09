@@ -704,6 +704,25 @@ class CurlyTag {
     evaluate(expression, ctx) {
         if (!expression) return undefined;
 
+        expression = expression.replace(
+            /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(not)\s+|\b(and)\b|\b(or)\b/g,
+            (match, not, and, or) => {
+                if (not) {
+                    return '!';
+                }
+
+                if (and) {
+                    return '&&';
+                }
+
+                if (or) {
+                    return '||';
+                }
+
+                return match;
+            },
+        );
+
         try {
             let func = new Function('data', `with(data) return (${expression});`);
 

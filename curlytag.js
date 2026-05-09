@@ -69,17 +69,15 @@ class CurlyTag {
                 return this.filter.escape(value);
             },
             escape: (value) => {
-                return String(value ?? '').replace(
-                    /[&<>"']/g,
-                    (m) =>
-                        ({
-                            '&': '&amp;',
-                            '<': '&lt;',
-                            '>': '&gt;',
-                            '"': '&quot;',
-                            "'": '&#39;',
-                        })[m] || m,
-                );
+                let callback = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+
+                return String(value ?? '').replace(/[&<>"']/g, (m) => (callback)[m] || m,);
             },
             escape_once: (value) => {
                 const unescaped = String(value ?? '')

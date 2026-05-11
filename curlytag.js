@@ -37,16 +37,47 @@ class CurlyTag {
         };
 
         this.openclose = {
-            if: ['elseif', 'else', 'endif'],
-            elseif: ['elseif', 'else', 'endif'],
-            else: ['endif', 'endcase', 'endfor', 'endunless'],
-            when: ['when', 'else', 'endcase'],
-            for: ['else', 'endfor'],
-            capture: ['endcapture'],
-            filter: ['endfilter'],
-            raw: ['endraw'],
-            comment: ['endcomment'],
-            unless: ['else', 'endunless'],
+            if: [
+                'elseif',
+                'else',
+                'endif'
+            ],
+            elseif: [
+                'elseif',
+                'else',
+                'endif'
+            ],
+            else: [
+                'endif',
+                'endcase',
+                'endfor',
+                'endunless'
+            ],
+            when: [
+                'when',
+                'else',
+                'endcase'
+            ],
+            for: [
+                'else',
+                'endfor'
+            ],
+            capture: [
+                'endcapture'
+            ],
+            filter: [
+                'endfilter'
+            ],
+            raw: [
+                'endraw'
+            ],
+            comment: [
+                'endcomment'
+            ],
+            unless: [
+                'else',
+                'endunless'
+            ],
         };
 
         this.filter = {
@@ -80,7 +111,7 @@ class CurlyTag {
                 return String(value ?? '').replace(/[&<>"']/g, (m) => (callback)[m] || m,);
             },
             escape_once: (value) => {
-                const unescaped = String(value ?? '')
+                let unescaped = String(value ?? '')
                     .replace(/&amp;/g, '&')
                     .replace(/&lt;/g, '<')
                     .replace(/&gt;/g, '>')
@@ -88,6 +119,24 @@ class CurlyTag {
                     .replace(/&#39;/g, "'");
 
                 return this.filter.escape(unescaped);
+            },
+            unescape: (value) => {
+                let unescaped = {
+                    '&amp;': '&',
+                    '&#38;': '&',
+                    '&lt;': '<',
+                    '&#60;': '<',
+                    '&gt;': '>',
+                    '&#62;': '>',
+                    '&apos;': "'",
+                    '&#39;': "'",
+                    '&quot;': '"',
+                    '&#34;': '"'
+                };
+
+                return  String.prototype.replace.call(value, unescaped, (m) => {
+                    return unescaped[m];
+                });
             },
             nl2br: (value) => {
                 return String(value).replace(/\n/g, '<br/>');
@@ -100,12 +149,7 @@ class CurlyTag {
             },
             striptag: (value) => {
                 // Remove all tags, including <style>, <script>, comments, etc.
-                return value
-                    .replace(/<\s*script[^>]*>[\s\S]*?<\/script>/gi, '')
-                    .replace(/<\s*style[^>]*>[\s\S]*?<\/style>/gi, '')
-                    .replace(/<!--[\s\S]*?-->/g, '')
-                    .replace(/<[^>]*>/g, '')
-                    .trim();
+                return value.replace(/<\s*script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<\s*style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '').trim();
             },
             // String
             capitalize: (value) => {
@@ -1338,9 +1382,7 @@ class CurlyTag {
         let match = token.value.match(/^filter\s(\w+)$/);
 
         if (!match) {
-            console.log(
-                `[Template] Invalid 'filter' syntax line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Invalid 'filter' syntax line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1380,6 +1422,6 @@ class CurlyTag {
     }
 }
 
-const template = CurlyTag.getInstance();
+const curlytag = CurlyTag.getInstance();
 
-export { template };
+export { curlytag };

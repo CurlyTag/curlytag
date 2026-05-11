@@ -110,16 +110,6 @@ class CurlyTag {
 
                 return String(value ?? '').replace(/[&<>"']/g, (m) => (callback)[m] || m,);
             },
-            escape_once: (value) => {
-                let unescaped = String(value ?? '')
-                    .replace(/&amp;/g, '&')
-                    .replace(/&lt;/g, '<')
-                    .replace(/&gt;/g, '>')
-                    .replace(/&quot;/g, '"')
-                    .replace(/&#39;/g, "'");
-
-                return this.filter.escape(unescaped);
-            },
             unescape: (value) => {
                 let unescaped = {
                     '&amp;': '&',
@@ -134,7 +124,7 @@ class CurlyTag {
                     '&#34;': '"'
                 };
 
-                return  String.prototype.replace.call(value, unescaped, (m) => {
+                return String.prototype.replace.call(value, unescaped, (m) => {
                     return unescaped[m];
                 });
             },
@@ -936,9 +926,7 @@ class CurlyTag {
         let match = token.value.match(/^cycle\s(.*)/);
 
         if (!match) {
-            console.warn(
-                `[Template] Invalid 'cycle' syntax line ${token.line} column ${token.column}`,
-            );
+            console.warn(`[Template] Invalid 'cycle' syntax line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1038,9 +1026,7 @@ class CurlyTag {
         let match = token.value.match(/^unless\s(.+)$/);
 
         if (!match) {
-            console.log(
-                `[Template] Invalid 'unless' syntax line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Invalid 'unless' syntax line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1060,9 +1046,7 @@ class CurlyTag {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'unless') {
-            console.log(
-                `[Template] Unexpected 'endunless' tag line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Unexpected 'endunless' tag line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1074,9 +1058,7 @@ class CurlyTag {
         let match = token.value.match(/^elseif\s(.+)$/);
 
         if (!match) {
-            console.log(
-                `[Template] Invalid 'elseif' syntax line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Invalid 'elseif' syntax line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1084,9 +1066,7 @@ class CurlyTag {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'if') {
-            console.log(
-                `[Template] Unexpected 'elseif' tag line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Unexpected 'elseif' tag line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1104,16 +1084,8 @@ class CurlyTag {
     handleElse(token, stack, ctx, index) {
         let top = stack[stack.length - 1];
 
-        if (
-            !top ||
-            (top.type !== 'if' &&
-                top.type !== 'unless' &&
-                top.type !== 'case' &&
-                top.type !== 'for')
-        ) {
-            console.log(
-                `[Template] Unexpected 'else' tag line ${token.line} column ${token.column}`,
-            );
+        if (!top || (top.type !== 'if' && top.type !== 'unless' && top.type !== 'case' && top.type !== 'for')) {
+            console.log(`[Template] Unexpected 'else' tag line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1128,9 +1100,7 @@ class CurlyTag {
         let match = token.value.match(/^for\s(.*)\sin\s([^|]+?)\s*(?:\s*\|\s*(.+))?$/);
 
         if (!match) {
-            console.log(
-                `[Template] Invalid 'for' syntax line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Invalid 'for' syntax line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1248,9 +1218,7 @@ class CurlyTag {
         let match = token.value.match(/^case\s([\w.]+)$/);
 
         if (!match) {
-            console.log(
-                `[Template] Invalid 'case' syntax line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Invalid 'case' syntax line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1276,9 +1244,7 @@ class CurlyTag {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'case') {
-            console.log(
-                `[Template] Unexpected 'when' tag line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Unexpected 'when' tag line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1293,9 +1259,7 @@ class CurlyTag {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'case') {
-            console.log(
-                `[Template] Unexpected 'case' tag line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Unexpected 'case' tag line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1307,9 +1271,7 @@ class CurlyTag {
         let match = token.value.match(/^capture\s(.+)$/);
 
         if (!match) {
-            console.warn(
-                `[Template] Invalid 'capture' syntax line ${token.line} column ${token.column}`,
-            );
+            console.warn(`[Template] Invalid 'capture' syntax line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1325,9 +1287,7 @@ class CurlyTag {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'capture') {
-            console.log(
-                `[Template] Unexpected 'endcapture' tag line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Unexpected 'endcapture' tag line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1348,9 +1308,7 @@ class CurlyTag {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'raw') {
-            console.log(
-                `[Template] Unexpected 'raw' tag line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Unexpected 'raw' tag line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1368,9 +1326,7 @@ class CurlyTag {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'comment') {
-            console.log(
-                `[Template] Unexpected 'comment' tag line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Unexpected 'comment' tag line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -1398,9 +1354,7 @@ class CurlyTag {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'capture') {
-            console.log(
-                `[Template] Unexpected 'endfilter' tag line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Unexpected 'endfilter' tag line ${token.line} column ${token.column}`);
 
             return;
         }

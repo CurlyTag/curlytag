@@ -779,10 +779,7 @@ class CurlyTag {
 
         let result = value;
 
-        let filters =
-            expression.indexOf('|') !== -1
-                ? expression.split('|').map((value) => value.trim())
-                : [expression];
+        let filters = expression.indexOf('|') !== -1 ? expression.split('|').map((value) => value.trim()) : [expression];
 
         for (let filter of filters) {
             let match = filter.match(/^([^:]*):?\s?(.+)?$/);
@@ -1002,13 +999,8 @@ class CurlyTag {
             ' contains ': ' in '
         }
 
-        let string = match[1];
-
-
-        //String.prototype.replace(string, //);
-
         // Check to see if a previous tag is inactive
-        let active = this.evaluate(string, ctx);
+        let active = this.evaluate(match[1], ctx);
 
         stack.push({
             type: 'if',

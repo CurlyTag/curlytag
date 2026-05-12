@@ -108,7 +108,7 @@ class CurlyTag {
                     "'": '&#39;'
                 };
 
-                return String(value ?? '').replace(/[&<>"']/g, (m) => (callback)[m] || m,);
+                return String(value ?? '').replace(/[&<>"']/g, (matched) => (callback)[matched] || matched);
             },
             unescape: (value) => {
                 let unescaped = {
@@ -124,8 +124,8 @@ class CurlyTag {
                     '&#34;': '"'
                 };
 
-                return String.prototype.replace.call(value, unescaped, (m) => {
-                    return unescaped[m];
+                return String.prototype.replace.call(value, unescaped, (matched) => {
+                    return unescaped[matched];
                 });
             },
             nl2br: (value) => {
@@ -142,6 +142,16 @@ class CurlyTag {
                 return value.replace(/<\s*script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<\s*style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '').trim();
             },
             // String
+            regex: (value, ) => {
+                var args = arguments, string = args[0], i = 1;
+
+
+
+
+
+                return string.replace(/%(%|s|d)/g, test);
+
+            },
             capitalize: (value) => {
                 let chars = [...String(value ?? '')];
 
@@ -224,9 +234,6 @@ class CurlyTag {
 
                 return string.slice(0, index) + string.slice(index + searchString.length);
             },
-            split: (value, separator) => {
-                return value.split(separator);
-            },
             append: (value, suffix) => {
                 return value + suffix;
             },
@@ -270,6 +277,9 @@ class CurlyTag {
 
                 return string.split(/\s+/).length;
             },
+            split: (value, separator) => {
+                return value.split(separator);
+            },
             // Array
             batch: (value, length, fill = null) => {
                 let result = [];
@@ -302,11 +312,7 @@ class CurlyTag {
                     let va = key ? a?.[key] : a;
                     let vb = key ? b?.[key] : b;
 
-                    return (
-                        String(va ?? '')
-                            .toLowerCase()
-                            .localeCompare(String(vb ?? '').toLowerCase()) * dir
-                    );
+                    return (String(va ?? '').toLowerCase().localeCompare(String(vb ?? '').toLowerCase()) * dir);
                 });
             },
             size: (value) => {
@@ -323,10 +329,7 @@ class CurlyTag {
                 return value.slice(0, limit);
             },
             sum: (value, amount = 0) => {
-                return value.reduce(
-                    (accumulator, currentValue) => accumulator + currentValue,
-                    amount,
-                );
+                return value.reduce((accumulator, currentValue) => accumulator + currentValue, amount);
             },
             push: (value, item) => {
                 const copy = [...value];
@@ -984,13 +987,28 @@ class CurlyTag {
         if (!match) {
             console.log(`[Template] Invalid 'if' syntax line ${token.line} column ${token.column}`);
 
-            stack.push({ type: 'if', active: true });
+            stack.push({
+                type: 'if',
+                active: true
+            });
 
             return token.end;
         }
 
+        let operator = {
+            ' not ': ' !',
+            ' and ': ' && ',
+            ' or ': ' || ',
+            ' contains ': ' in '
+        }
+
+        let string = match[1];
+
+
+        //String.prototype.replace(string, //);
+
         // Check to see if a previous tag is inactive
-        let active = this.evaluate(match[1], ctx);
+        let active = this.evaluate(string, ctx);
 
         stack.push({
             type: 'if',

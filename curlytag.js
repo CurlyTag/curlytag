@@ -678,12 +678,8 @@ class CurlyTag {
                     token[top.index].end = token.length;
 
                     let popped = stack.pop();
-                    let closedByElse =
-                        command === 'else' && (popped.type === 'for' || popped.type === 'unless');
-                    let closedElseOfLoop =
-                        (command === 'endfor' || command === 'endunless') &&
-                        popped.type === 'else' &&
-                        popped.forRef !== undefined;
+                    let closedByElse = command === 'else' && (popped.type === 'for' || popped.type === 'unless');
+                    let closedElseOfLoop = (command === 'endfor' || command === 'endunless') && popped.type === 'else' && popped.forRef !== undefined;
 
                     if (closedByElse) {
                         forRef = popped.index;

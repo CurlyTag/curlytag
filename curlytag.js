@@ -142,12 +142,8 @@ class CurlyTag {
                 return value.replace(/<\s*script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<\s*style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '').trim();
             },
             // String
-            regex: (value, ) => {
+            regex: (value, test) => {
                 var args = arguments, string = args[0], i = 1;
-
-
-
-
 
                 return string.replace(/%(%|s|d)/g, test);
 

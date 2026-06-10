@@ -1,4 +1,3 @@
-const IS_NODE = typeof process !== 'undefined' && !!process.versions?.node;
 /* OpenCart Twig replacement. Based on Django, Nunjucks template syntax. */
 class CurlyTag {
     static instance = null;
@@ -511,18 +510,6 @@ class CurlyTag {
             }
         }
 
-        if (IS_NODE) {
-            const fs = await import('node:fs/promises');
-
-            try {
-                return await fs.readFile(file, 'utf-8');
-            } catch {
-                console.log(`[Template] Could not load template file ${path}!`);
-
-                return '';
-            }
-        }
-
         let response = await fetch(file);
 
         if (response.status == 200) {
@@ -646,7 +633,7 @@ class CurlyTag {
             if (match.index > index) {
                 token.push({
                     type: 'text',
-                    raw: template.slice(index, match.index),
+                    raw: template.slice(index, match.index)
                 });
             }
 
@@ -657,7 +644,7 @@ class CurlyTag {
                     value: output,
                     raw: raw,
                     line: line,
-                    column: index,
+                    column: index
                 });
             }
 
@@ -668,34 +655,18 @@ class CurlyTag {
                 // Handle Close Tags
                 let top = stack[stack.length - 1];
 
-                let forRef;
-
                 if (top && this.openclose[top.type].includes(command)) {
                     token[top.index].end = token.length;
 
-                    let popped = stack.pop();
-                    let closedByElse = command === 'else' && (popped.type === 'for' || popped.type === 'unless');
-                    let closedElseOfLoop = (command === 'endfor' || command === 'endunless') && popped.type === 'else' && popped.forRef !== undefined;
-
-                    if (closedByElse) {
-                        forRef = popped.index;
-                    } else if (closedElseOfLoop) {
-                        token[popped.forRef].loopEnd = token.length;
-                    }
+                    stack.pop();
                 }
 
                 // Handle Open Tags
                 if (command in this.openclose) {
-                    let entry = {
+                    stack.push({
                         type: command,
-                        index: token.length,
-                    };
-
-                    if (forRef !== undefined) {
-                        entry.forRef = forRef;
-                    }
-
-                    stack.push(entry);
+                        index: token.length
+                    });
                 }
 
                 token.push({
@@ -704,7 +675,7 @@ class CurlyTag {
                     value: tag,
                     raw: raw,
                     line: line,
-                    column: index,
+                    column: index
                 });
             }
 
@@ -716,15 +687,13 @@ class CurlyTag {
         if (index < template.length) {
             token.push({
                 type: 'text',
-                raw: template.slice(index),
+                raw: template.slice(index)
             });
         }
 
         // Warning for unclosed blocks
         if (stack.length) {
-            console.log(
-                `[Template] Warning: ${stack.length} unclosed block(s): ${stack.map((value) => value.type)}`,
-            );
+            console.log(`[Template] Warning: ${stack.length} unclosed block(s): ${stack.map((value) => value.type)}`);
         }
 
         return token;
@@ -733,24 +702,21 @@ class CurlyTag {
     evaluate(expression, ctx) {
         if (!expression) return undefined;
 
-        expression = expression.replace(
-            /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(not)\s+|\b(and)\b|\b(or)\b/g,
-            (match, not, and, or) => {
-                if (not) {
-                    return '!';
-                }
+        expression = expression.replaceAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'(\snot\s)|(\sand\s)|(\sor\s)b/g, (match, not, and, or) => {
+            if (not) {
+                return ' !';
+            }
 
-                if (and) {
-                    return '&&';
-                }
+            if (and) {
+                return ' && ';
+            }
 
-                if (or) {
-                    return '||';
-                }
+            if (or) {
+                return ' || ';
+            }
 
-                return match;
-            },
-        );
+            return match;
+        });
 
         try {
             let func = new Function('data', `with(data) return (${expression});`);
@@ -851,9 +817,7 @@ class CurlyTag {
         let match = token.value.match(/^assign\s(\w+)\s=\s([^|]+?)\s*(?:\s*\|\s*(.+))?$/);
 
         if (!match) {
-            console.log(
-                `[Template] Invalid 'assign' syntax line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Invalid 'assign' syntax line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -875,9 +839,7 @@ class CurlyTag {
         let match = token.value.match(/^include\s(.+)$/);
 
         if (!match) {
-            console.warn(
-                `[Template] Invalid 'include' syntax line ${token.line} column ${token.column}`,
-            );
+            console.warn(`[Template] Invalid 'include' syntax line ${token.line} column ${token.column}`);
 
             return;
         }
@@ -886,7 +848,7 @@ class CurlyTag {
 
         stack.push({
             type: 'output',
-            output: output,
+            output: output
         });
     }
 
@@ -982,13 +944,6 @@ class CurlyTag {
             });
 
             return token.end;
-        }
-
-        let operator = {
-            ' not ': ' !',
-            ' and ': ' && ',
-            ' or ': ' || ',
-            ' contains ': ' in '
         }
 
         // Check to see if a previous tag is inactive

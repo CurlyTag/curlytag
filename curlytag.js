@@ -351,6 +351,8 @@ class CurlyTag {
                 return copy;
             },
             slice: (value, start, end) => {
+                if (typeof value !== 'string' && typeof value !== 'array') return;
+
                 return end !== undefined ? value.slice(start, end) : value.slice(start);
             },
             join: (value, seperator = ' ') => {
@@ -1191,9 +1193,7 @@ class CurlyTag {
         let match = token.value.match(/^when\s(.+)$/);
 
         if (!match) {
-            console.log(
-                `[Template] Invalid 'when' syntax line ${token.line} column ${token.column}`,
-            );
+            console.log(`[Template] Invalid 'when' syntax line ${token.line} column ${token.column}`);
 
             return;
         }

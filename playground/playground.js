@@ -9,6 +9,24 @@ import appsIcon from 'remixicon/icons/System/apps-2-line.svg?raw';
 import fileCopyIcon from 'remixicon/icons/Document/file-copy-line.svg?raw';
 import resetLeftIcon from 'remixicon/icons/System/reset-left-line.svg?raw';
 
+// Must be at module level - Vite resolves globs statically at build time
+const exampleTemplateModules = import.meta.glob('./examples/*/template.html', {
+    query: '?raw',
+    import: 'default',
+});
+
+const exampleDataModules = import.meta.glob('./examples/*/data.json', {
+    import: 'default',
+});
+
+// Start loading Shiki immediately so it's ready by first render
+const highlighterPromise = import('shiki').then(({ createHighlighter }) =>
+    createHighlighter({
+        themes: ['github-light', 'github-dark'],
+        langs: ['html', 'javascript', 'bash', 'json'],
+    }),
+);
+
 const cmTheme = EditorView.theme({
     '&': {
         fontSize: 'inherit',
@@ -67,6 +85,71 @@ const cmTheme = EditorView.theme({
     },
 });
 
+// Shared pure helpers - no DOM dependency, usable outside init()
+
+const withSvgClass = (svg) =>
+    svg.replace('<svg', '<svg class="button-icon__svg" aria-hidden="true"');
+
+const setButtonIcon = (slot, svg) => {
+    if (!slot) return;
+
+    slot.innerHTML = withSvgClass(svg);
+};
+
+const isStandalonePlayground = () => document.body.classList.contains('playground-page');
+
+const syncStandaloneThemeClass = () => {
+    if (!isStandalonePlayground()) return;
+
+    document.documentElement.classList.toggle(
+        'dark',
+        window.matchMedia('(prefers-color-scheme: dark)').matches,
+    );
+};
+
+const getButtonLabel = (button) => button.querySelector('[data-button-label]') ?? button;
+
+const flashButton = (button, label) => {
+    const labelEl = getButtonLabel(button);
+    const previousLabel = labelEl.textContent;
+
+    labelEl.textContent = label;
+    window.setTimeout(() => {
+        labelEl.textContent = previousLabel;
+    }, 1200);
+};
+
+const getShikiTheme = () =>
+    document.documentElement.classList.contains('dark') ? 'github-dark' : 'github-light';
+
+const markWhitespace = (el) => {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    let node;
+
+    while ((node = walker.nextNode())) textNodes.push(node);
+
+    for (const tn of textNodes) {
+        if (!/ |\t/.test(tn.nodeValue)) continue;
+
+        const frag = document.createDocumentFragment();
+
+        for (const ch of tn.nodeValue) {
+            if (ch === ' ' || ch === '\t') {
+                const s = document.createElement('span');
+
+                s.className = ch === ' ' ? 'shiki-ws-space' : 'shiki-ws-tab';
+                s.textContent = ch;
+                frag.appendChild(s);
+            } else {
+                frag.appendChild(document.createTextNode(ch));
+            }
+        }
+
+        tn.replaceWith(frag);
+    }
+};
+
 const wsSpaceDeco = Decoration.mark({ class: 'cm-ws-space' });
 const wsTabDeco = Decoration.mark({ class: 'cm-ws-tab' });
 
@@ -98,62 +181,6 @@ const whitespacePlugin = ViewPlugin.fromClass(
     },
     { decorations: (v) => v.decorations },
 );
-
-const sourceEl = document.getElementById('output-source-code');
-const popover = document.getElementById('examples-panel');
-const examplesTrigger = document.querySelector('.examples__trigger');
-const outputState = {
-    kind: 'empty',
-    content: '',
-};
-const editorControls = {
-    template: {
-        copyButton: document.querySelector('[data-editor-action="copy-template"]'),
-        resetButton: document.querySelector('[data-editor-action="reset-template"]'),
-    },
-    data: {
-        copyButton: document.querySelector('[data-editor-action="copy-data"]'),
-        resetButton: document.querySelector('[data-editor-action="reset-data"]'),
-    },
-};
-
-const withSvgClass = (svg) =>
-    svg.replace('<svg', '<svg class="button-icon__svg" aria-hidden="true"');
-
-const setButtonIcon = (slot, svg) => {
-    slot.innerHTML = withSvgClass(svg);
-};
-
-const getButtonLabel = (button) => button.querySelector('[data-button-label]') ?? button;
-
-const applyButtonIcons = () => {
-    setButtonIcon(examplesTrigger.querySelector('.examples__trigger-icon'), appsIcon);
-
-    for (const [action, button] of [
-        ['copy', editorControls.template.copyButton],
-        ['reset', editorControls.template.resetButton],
-        ['copy', editorControls.data.copyButton],
-        ['reset', editorControls.data.resetButton],
-    ]) {
-        const slot = button.querySelector('.editor-section__action-icon');
-
-        setButtonIcon(slot, action === 'copy' ? fileCopyIcon : resetLeftIcon);
-    }
-};
-
-const setOutputState = (kind, content = '') => {
-    outputState.kind = kind;
-    outputState.content = content;
-};
-
-const exampleTemplateModules = import.meta.glob('./examples/*/template.html', {
-    query: '?raw',
-    import: 'default',
-});
-
-const exampleDataModules = import.meta.glob('./examples/*/data.json', {
-    import: 'default',
-});
 
 const templateFoldBoundaries = {
     if: new Set(['elseif', 'else', 'endif']),
@@ -250,240 +277,263 @@ const createEditor = (parent, langExt, onChange) => {
     });
 };
 
-const originalDocs = { template: '', data: '' };
+/**
+ * Mounts the playground into `root`. Defaults to `document` for standalone use.
+ * @param {Document | HTMLElement} [root=document]
+ */
+export const init = (root = document) => {
+    syncStandaloneThemeClass();
 
-let renderTimer;
+    const qs = (sel) => root.querySelector(sel);
 
-const scheduleRender = () => {
-    clearTimeout(renderTimer);
-    renderTimer = setTimeout(render, 80);
-};
+    const sourceEl = qs('#output-source-code');
+    const popover = qs('#examples-panel');
+    const examplesTrigger = qs('[popovertarget="examples-panel"]');
 
-const renderNow = () => {
-    clearTimeout(renderTimer);
-    return render();
-};
+    if (!sourceEl || !popover || !examplesTrigger) return () => {};
 
-const tplView = createEditor(document.getElementById('template-editor'), templateLanguage, () => {
-    syncResetButton('template');
-    scheduleRender();
-});
+    const outputState = {
+        kind: 'empty',
+        content: '',
+    };
+    const editorControls = {
+        template: {
+            copyButton: qs('[data-editor-action="copy-template"]'),
+            resetButton: qs('[data-editor-action="reset-template"]'),
+        },
+        data: {
+            copyButton: qs('[data-editor-action="copy-data"]'),
+            resetButton: qs('[data-editor-action="reset-data"]'),
+        },
+    };
 
-const dataView = createEditor(document.getElementById('data-editor'), json, () => {
-    syncResetButton('data');
-    scheduleRender();
-});
+    const applyButtonIcons = () => {
+        setButtonIcon(examplesTrigger.querySelector('.examples__trigger-icon'), appsIcon);
 
-const getEditorView = (kind) => (kind === 'template' ? tplView : dataView);
+        for (const [action, button] of [
+            ['copy', editorControls.template.copyButton],
+            ['reset', editorControls.template.resetButton],
+            ['copy', editorControls.data.copyButton],
+            ['reset', editorControls.data.resetButton],
+        ]) {
+            const slot = button.querySelector('.editor-section__action-icon');
 
-const getEditorDoc = (kind) => getEditorView(kind).state.doc.toString();
+            setButtonIcon(slot, action === 'copy' ? fileCopyIcon : resetLeftIcon);
+        }
+    };
 
-const replaceEditorDoc = (kind, value) => {
-    const view = getEditorView(kind);
+    const setOutputState = (kind, content = '') => {
+        outputState.kind = kind;
+        outputState.content = content;
+    };
 
-    view.dispatch({
-        changes: { from: 0, to: view.state.doc.length, insert: value },
+    const originalDocs = { template: '', data: '' };
+
+    let renderTimer;
+
+    const scheduleRender = () => {
+        clearTimeout(renderTimer);
+        renderTimer = setTimeout(render, 80);
+    };
+
+    const renderNow = () => {
+        clearTimeout(renderTimer);
+        return render();
+    };
+
+    const tplView = createEditor(qs('#template-editor'), templateLanguage, () => {
+        syncResetButton('template');
+        scheduleRender();
     });
-};
 
-const syncResetButton = (kind) => {
-    editorControls[kind].resetButton.hidden = getEditorDoc(kind) === originalDocs[kind];
-};
+    const dataView = createEditor(qs('#data-editor'), json, () => {
+        syncResetButton('data');
+        scheduleRender();
+    });
 
-const syncEditorActions = () => {
-    syncResetButton('template');
-    syncResetButton('data');
-};
+    const getEditorView = (kind) => (kind === 'template' ? tplView : dataView);
 
-const flashButton = (button, label) => {
-    const labelEl = getButtonLabel(button);
-    const previousLabel = labelEl.textContent;
+    const getEditorDoc = (kind) => getEditorView(kind).state.doc.toString();
 
-    labelEl.textContent = label;
-    window.setTimeout(() => {
-        labelEl.textContent = previousLabel;
-    }, 1200);
-};
+    const replaceEditorDoc = (kind, value) => {
+        const view = getEditorView(kind);
 
-const copyEditorDoc = async (kind) => {
-    try {
-        await navigator.clipboard.writeText(getEditorDoc(kind));
-        flashButton(editorControls[kind].copyButton, 'Copied');
-    } catch {
-        flashButton(editorControls[kind].copyButton, 'Failed');
-    }
-};
+        view.dispatch({
+            changes: { from: 0, to: view.state.doc.length, insert: value },
+        });
+    };
 
-const resetEditorDoc = (kind) => {
-    replaceEditorDoc(kind, originalDocs[kind]);
-    getEditorView(kind).focus();
-    renderNow();
-};
+    const syncResetButton = (kind) => {
+        editorControls[kind].resetButton.hidden = getEditorDoc(kind) === originalDocs[kind];
+    };
 
-const highlighterPromise = import('shiki').then(({ createHighlighter }) =>
-    createHighlighter({
-        themes: ['github-light', 'github-dark'],
-        langs: ['html'],
-    }),
-);
+    const syncEditorActions = () => {
+        syncResetButton('template');
+        syncResetButton('data');
+    };
 
-const getShikiTheme = () => {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'github-dark'
-        : 'github-light';
-};
+    const copyEditorDoc = async (kind) => {
+        try {
+            await navigator.clipboard.writeText(getEditorDoc(kind));
+            flashButton(editorControls[kind].copyButton, 'Copied');
+        } catch {
+            flashButton(editorControls[kind].copyButton, 'Failed');
+        }
+    };
 
-const markWhitespace = (el) => {
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-    const textNodes = [];
-    let node;
+    const resetEditorDoc = (kind) => {
+        replaceEditorDoc(kind, originalDocs[kind]);
+        getEditorView(kind).focus();
+        renderNow();
+    };
 
-    while ((node = walker.nextNode())) textNodes.push(node);
+    const highlightOutput = async (code) => {
+        const highlighter = await highlighterPromise;
 
-    for (const tn of textNodes) {
-        if (!/ |\t/.test(tn.nodeValue)) continue;
+        sourceEl.innerHTML = highlighter.codeToHtml(code || ' ', {
+            lang: 'html',
+            theme: getShikiTheme(),
+        });
 
-        const frag = document.createDocumentFragment();
+        markWhitespace(sourceEl);
+    };
 
-        for (const ch of tn.nodeValue) {
-            if (ch === ' ' || ch === '\t') {
-                const s = document.createElement('span');
-
-                s.className = ch === ' ' ? 'shiki-ws-space' : 'shiki-ws-tab';
-                s.textContent = ch;
-                frag.appendChild(s);
-            } else {
-                frag.appendChild(document.createTextNode(ch));
-            }
+    const presentOutput = async () => {
+        if (outputState.kind === 'data-error') {
+            sourceEl.innerHTML =
+                '<div class="editor-section__error">⚠ Invalid JSON in Data panel</div>';
+            return;
         }
 
-        tn.replaceWith(frag);
-    }
-};
+        await highlightOutput(outputState.content);
+    };
 
-const highlightOutput = async (code) => {
-    const highlighter = await highlighterPromise;
+    const render = async () => {
+        const tplCode = tplView.state.doc.toString();
+        const dataCode = dataView.state.doc.toString();
+        let data;
 
-    sourceEl.innerHTML = highlighter.codeToHtml(code || ' ', {
-        lang: 'html',
-        theme: getShikiTheme(),
+        try {
+            data = JSON.parse(dataCode);
+        } catch {
+            setOutputState('data-error');
+            await presentOutput();
+            return;
+        }
+
+        try {
+            const result = template.parse(tplCode, data);
+
+            setOutputState('html', result);
+            await presentOutput();
+        } catch (e) {
+            const message = String(e.message);
+
+            setOutputState('template-error', message);
+            await presentOutput();
+        }
+    };
+
+    const loadExampleFiles = async (key) => {
+        const templateLoader = exampleTemplateModules[`./examples/${key}/template.html`];
+        const dataLoader = exampleDataModules[`./examples/${key}/data.json`];
+
+        if (!templateLoader || !dataLoader) return null;
+
+        const [templateSource, dataSource] = await Promise.all([templateLoader(), dataLoader()]);
+
+        return {
+            template: templateSource,
+            data: dataSource,
+        };
+    };
+
+    let activeBtn = null;
+    let exampleLoadToken = 0;
+
+    const loadExample = async (key) => {
+        const loadToken = ++exampleLoadToken;
+
+        try {
+            const example = await loadExampleFiles(key);
+
+            if (!example || loadToken !== exampleLoadToken) return;
+
+            const dataSource = JSON.stringify(example.data, null, 2);
+
+            originalDocs.template = example.template;
+            originalDocs.data = dataSource;
+
+            replaceEditorDoc('template', example.template);
+            replaceEditorDoc('data', dataSource);
+            syncEditorActions();
+
+            activeBtn?.classList.remove('examples__item--active');
+            activeBtn = qs(`[data-example="${key}"]`);
+            activeBtn?.classList.add('examples__item--active');
+
+            await renderNow();
+        } catch (error) {
+            console.error(`Failed to load example "${key}"`, error);
+
+            if (loadToken !== exampleLoadToken) return;
+
+            setOutputState('template-error', `Failed to load example "${key}".`);
+            await presentOutput();
+        }
+    };
+
+    const handleThemeChange = () => {
+        void presentOutput();
+    };
+
+    const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleSystemThemeChange = () => {
+        syncStandaloneThemeClass();
+        handleThemeChange();
+    };
+
+    const themeObserver = new MutationObserver(() => {
+        handleThemeChange();
     });
 
-    markWhitespace(sourceEl);
-};
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+    });
 
-const presentOutput = async () => {
-    if (outputState.kind === 'data-error') {
-        sourceEl.innerHTML =
-            '<div class="editor-section__error">⚠ Invalid JSON in Data panel</div>';
-        return;
-    }
+    colorSchemeQuery.addEventListener('change', handleSystemThemeChange);
 
-    await highlightOutput(outputState.content);
-};
+    popover.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-example]');
 
-const render = async () => {
-    const tplCode = tplView.state.doc.toString();
-    const dataCode = dataView.state.doc.toString();
-    let data;
+        if (!btn) return;
 
-    try {
-        data = JSON.parse(dataCode);
-    } catch {
-        setOutputState('data-error');
-        await presentOutput();
-        return;
-    }
+        void loadExample(btn.dataset.example);
+        popover.hidePopover();
+    });
 
-    try {
-        const result = template.parse(tplCode, data);
+    root.addEventListener('click', (e) => {
+        const actionButton = e.target.closest('[data-editor-action]');
 
-        setOutputState('html', result);
-        await presentOutput();
-    } catch (e) {
-        const message = String(e.message);
+        if (!actionButton) return;
 
-        setOutputState('template-error', message);
-        await presentOutput();
-    }
-};
+        const [action, kind] = actionButton.dataset.editorAction.split('-');
 
-const loadExampleFiles = async (key) => {
-    const templateLoader = exampleTemplateModules[`./examples/${key}/template.html`];
-    const dataLoader = exampleDataModules[`./examples/${key}/data.json`];
+        if (action === 'copy') {
+            copyEditorDoc(kind);
+            return;
+        }
 
-    if (!templateLoader || !dataLoader) return null;
+        if (action === 'reset') resetEditorDoc(kind);
+    });
 
-    const [templateSource, dataSource] = await Promise.all([templateLoader(), dataLoader()]);
+    applyButtonIcons();
+    void loadExample('category');
 
-    return {
-        template: templateSource,
-        data: dataSource,
+    return () => {
+        colorSchemeQuery.removeEventListener('change', handleSystemThemeChange);
+        themeObserver.disconnect();
     };
 };
-
-let activeBtn = null;
-let exampleLoadToken = 0;
-
-const loadExample = async (key) => {
-    const loadToken = ++exampleLoadToken;
-
-    try {
-        const example = await loadExampleFiles(key);
-
-        if (!example || loadToken !== exampleLoadToken) return;
-
-        const dataSource = JSON.stringify(example.data, null, 2);
-
-        originalDocs.template = example.template;
-        originalDocs.data = dataSource;
-
-        replaceEditorDoc('template', example.template);
-        replaceEditorDoc('data', dataSource);
-        syncEditorActions();
-
-        activeBtn?.classList.remove('examples__item--active');
-        activeBtn = popover.querySelector(`[data-example="${key}"]`);
-        activeBtn?.classList.add('examples__item--active');
-
-        await renderNow();
-    } catch (error) {
-        console.error(`Failed to load example "${key}"`, error);
-
-        if (loadToken !== exampleLoadToken) return;
-
-        setOutputState('template-error', `Failed to load example "${key}".`);
-        await presentOutput();
-    }
-};
-
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    presentOutput();
-});
-
-popover.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-example]');
-
-    if (!btn) return;
-
-    void loadExample(btn.dataset.example);
-    popover.hidePopover();
-});
-
-document.addEventListener('click', (e) => {
-    const actionButton = e.target.closest('[data-editor-action]');
-
-    if (!actionButton) return;
-
-    const [action, kind] = actionButton.dataset.editorAction.split('-');
-
-    if (action === 'copy') {
-        copyEditorDoc(kind);
-        return;
-    }
-
-    if (action === 'reset') resetEditorDoc(kind);
-});
-
-applyButtonIcons();
-void loadExample('category');

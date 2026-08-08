@@ -1,5 +1,13 @@
-/* OpenCart Twig replacement. Based on Django, Nunjucks template syntax. */
-class CurlyTag {
+/*
+* CurlyTwig
+*
+* @description Template engine
+*
+* @author Daniel Kerr
+*
+* OpenCart Twig replacement. Based on Django, Nunjucks template syntax.
+*/
+export class CurlyTag {
     static instance = null;
 
     constructor() {
@@ -77,6 +85,12 @@ class CurlyTag {
                 'else',
                 'endunless'
             ],
+        };
+
+        this.operator = {
+            not: ' !',
+            and: ' && ',
+            or: ' || '
         };
 
         this.filter = {
@@ -327,25 +341,29 @@ class CurlyTag {
                 return value.reduce((accumulator, currentValue) => accumulator + currentValue, amount);
             },
             push: (value, item) => {
-                const copy = [...value];
+                let copy = [ ...value ];
+
                 copy.push(item);
 
                 return copy;
             },
             pop: (value) => {
-                const copy = [...value];
+                let copy = [ ...value ];
+
                 copy.pop();
 
                 return copy;
             },
             shift: (value) => {
-                const copy = [...value];
+                let copy = [ ...value ];
+
                 copy.shift();
 
                 return copy;
             },
             unshift: (value, item) => {
-                const copy = [...value];
+                let copy = [ ...value ];
+
                 copy.unshift(item);
 
                 return copy;
@@ -359,11 +377,9 @@ class CurlyTag {
                 return value.join(seperator);
             },
             array_to_sentence_string: (value, connector = 'and') => {
-                const items = Array.isArray(value)
-                    ? value.map((item) => String(item ?? '')).filter((item) => item !== '')
-                    : [];
+                let items = Array.isArray(value) ? value.map((item) => String(item ?? '')).filter((item) => item !== '') : [];
 
-                const word = String(connector ?? 'and');
+                let word = String(connector ?? 'and');
 
                 if (items.length === 0) {
                     return '';
@@ -453,7 +469,7 @@ class CurlyTag {
                 return isNaN(number) ? minimum : Math.max(number, minimum);
             },
             at_most: (value, maximum) => {
-                const number = Number(value);
+                let number = Number(value);
 
                 return isNaN(number) ? maximum : Math.min(number, maximum);
             },
@@ -472,8 +488,8 @@ class CurlyTag {
             },
             base64_decode: (value) => {
                 try {
-                    const binary = atob(String(value ?? ''));
-                    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+                    let binary = atob(String(value ?? ''));
+                    let bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
 
                     return new TextDecoder().decode(bytes);
                 } catch {
@@ -731,6 +747,32 @@ class CurlyTag {
         }
     }
 
+    truthy(value) {
+        switch (typeof value) {
+            case 'undefined':
+                return false;
+                break;
+            case 'string':
+                return value !== '';
+                break;
+            case 'number':
+                return value >= 0;
+                break;
+            case 'boolean':
+                return value;
+                break;
+            case 'object':
+                if (Array.isArray(value)) {
+                    return value.length > 0;
+                }
+
+                return Object.keys(value).length > 0 && value.constructor === Object;
+                break;
+        }
+
+        return false;
+    }
+
     /**
      * Apply chain of filters — now supports multiple comma-separated arguments per filter
      */
@@ -951,6 +993,9 @@ class CurlyTag {
         // Check to see if a previous tag is inactive
         let active = this.evaluate(match[1], ctx);
 
+        // Convert the output into bool
+        active = this.truthy(active);
+
         stack.push({
             type: 'if',
             active: active,
@@ -991,7 +1036,10 @@ class CurlyTag {
         }
 
         // Check to see if a previous tag is inactive
-        let active = !this.evaluate(match[1], ctx);
+        let active = this.evaluate(match[1], ctx);
+
+        // Convert the output into bool
+        active = !this.truthy(active);
 
         stack.push({
             type: 'unless',
@@ -1033,7 +1081,10 @@ class CurlyTag {
         if (top.active) return token.end;
 
         // If any previous not active tags then set current tag to false;
-        top.active = this.evaluate(match[1], ctx);
+        let active = this.evaluate(match[1], ctx);
+
+        // Convert the output into bool
+        top.active = this.truthy(active);
 
         if (!top.active) {
             return token.end;

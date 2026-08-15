@@ -10,6 +10,10 @@ describe('if / elseif / else', () => {
         expect(curlytag.parse('{% if show %}yes{% endif %}', { show: false })).toBe('');
     });
 
+    test('null value is falsy', () => {
+        expect(curlytag.parse('{% if show %}yes{% else %}no{% endif %}', { show: null })).toBe('no');
+    });
+
     test('else branch', () => {
         expect(curlytag.parse('{% if show %}yes{% else %}no{% endif %}', { show: false })).toBe(
             'no'

@@ -761,6 +761,10 @@ export class CurlyTag {
                 return value;
                 break;
             case 'object':
+                if (value === null) {
+                    return false;
+                }
+
                 if (Array.isArray(value)) {
                     return value.length > 0;
                 }

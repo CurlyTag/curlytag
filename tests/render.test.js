@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, test } from 'vite-plus/test';
-import { template } from '#curlytag';
+import { curlytag } from '#curlytag';
 
 describe('render (Node.js)', () => {
     beforeEach(() => {
-        template.addPath('playground/');
-        template.cache.clear();
+        curlytag.addPath('playground/');
+        curlytag.cache.clear();
     });
 
     test('render() loads a loop template and renders items', async () => {
-        const result = await template.render('examples/loop/template', {
+        const result = await curlytag.render('examples/loop/template', {
             team: [ 'Alice', 'Bob', 'Carol' ]
         });
         expect(result).toContain('Alice');
@@ -17,19 +17,19 @@ describe('render (Node.js)', () => {
     });
 
     test('render() loop template renders loop.index correctly', async () => {
-        const result = await template.render('examples/loop/template', { team: [ 'Alice' ] });
+        const result = await curlytag.render('examples/loop/template', { team: [ 'Alice' ] });
         expect(result).toContain('1. Alice');
     });
 
     test('render() loads a conditions template — admin branch', async () => {
-        const result = await template.render('examples/conditions/template', { role: 'admin' });
+        const result = await curlytag.render('examples/conditions/template', { role: 'admin' });
         expect(result).toContain('Admin access');
         expect(result).not.toContain('Editor access');
         expect(result).not.toContain('Viewer access');
     });
 
     test('render() loads a conditions template — elseif branch', async () => {
-        const result = await template.render('examples/conditions/template', {
+        const result = await curlytag.render('examples/conditions/template', {
             role: 'editor'
         });
         expect(result).toContain('Editor access');
@@ -37,12 +37,12 @@ describe('render (Node.js)', () => {
     });
 
     test('render() loads a conditions template — else branch', async () => {
-        const result = await template.render('examples/conditions/template', { role: 'guest' });
+        const result = await curlytag.render('examples/conditions/template', { role: 'guest' });
         expect(result).toContain('Viewer access');
     });
 
     test('render() loads a filters template', async () => {
-        const result = await template.render('examples/filters/template', {
+        const result = await curlytag.render('examples/filters/template', {
             title: 'hello',
             greeting: 'Hello world',
             price: 9.999,
@@ -54,7 +54,7 @@ describe('render (Node.js)', () => {
     });
 
     test('render() loads a nested template', async () => {
-        const result = await template.render('examples/nested/template', {
+        const result = await curlytag.render('examples/nested/template', {
             title: 'Team',
             users: [
                 { name: 'Alice', active: true, roles: [ 'admin' ] },
@@ -68,19 +68,19 @@ describe('render (Node.js)', () => {
     });
 
     test('render() caches the template on second call', async () => {
-        await template.render('examples/loop/template', { team: [ 'Alice' ] });
-        expect(template.cache.has('examples/loop/template')).toBe(true);
-        const result = await template.render('examples/loop/template', { team: [ 'Bob' ] });
+        await curlytag.render('examples/loop/template', { team: [ 'Alice' ] });
+        expect(curlytag.cache.has('examples/loop/template')).toBe(true);
+        const result = await curlytag.render('examples/loop/template', { team: [ 'Bob' ] });
         expect(result).toContain('Bob');
     });
 
     test('render() returns empty string for non-existent file', async () => {
-        const result = await template.render('examples/does-not-exist/template', {});
+        const result = await curlytag.render('examples/does-not-exist/template', {});
         expect(result).toBe('');
     });
 
     test('render() with empty data object renders static template', async () => {
-        const result = await template.render('examples/loop/template', {});
+        const result = await curlytag.render('examples/loop/template', {});
         expect(typeof result).toBe('string');
     });
 });

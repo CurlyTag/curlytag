@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vite-plus/test';
 import * as nodefs from 'node:fs/promises';
-import { template } from '#curlytag';
+import { curlytag } from '#curlytag';
 
 vi.mock('node:fs/promises', () => ({
     readFile: vi.fn()
@@ -9,9 +9,9 @@ vi.mock('node:fs/promises', () => ({
 describe('CurlyTag fetch() path construction', () => {
     beforeEach(() => {
         vi.mocked(nodefs.readFile).mockResolvedValue('');
-        template.path.clear();
-        template.directory = '';
-        template.cache.clear();
+        curlytag.path.clear();
+        curlytag.directory = '';
+        curlytag.cache.clear();
     });
 
     afterEach(() => {
@@ -20,8 +20,8 @@ describe('CurlyTag fetch() path construction', () => {
 
     describe('directory (default path)', () => {
         test('simple path: directory + path + .html', async () => {
-            template.directory = '/templates/';
-            await template.fetch('greeting');
+            curlytag.directory = '/templates/';
+            await curlytag.fetch('greeting');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/greeting.html',
                 'utf-8'
@@ -29,8 +29,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('one-level nested path keeps directory prefix', async () => {
-            template.directory = '/templates/';
-            await template.fetch('sub/page');
+            curlytag.directory = '/templates/';
+            await curlytag.fetch('sub/page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/sub/page.html',
                 'utf-8'
@@ -38,8 +38,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('deeply nested path keeps directory prefix', async () => {
-            template.directory = '/var/www/views/';
-            await template.fetch('admin/user/list');
+            curlytag.directory = '/var/www/views/';
+            await curlytag.fetch('admin/user/list');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/var/www/views/admin/user/list.html',
                 'utf-8'
@@ -47,8 +47,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('addPath with single arg sets directory', async () => {
-            template.addPath('/my/templates/');
-            await template.fetch('index');
+            curlytag.addPath('/my/templates/');
+            await curlytag.fetch('index');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/my/templates/index.html',
                 'utf-8'
@@ -56,16 +56,16 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('empty directory produces path starting from root segment', async () => {
-            template.directory = '';
-            await template.fetch('page');
+            curlytag.directory = '';
+            await curlytag.fetch('page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('page.html', 'utf-8');
         });
     });
 
     describe('namespace path resolution', () => {
         test('first segment namespace suffix is appended correctly', async () => {
-            template.addPath('catalog', '/themes/catalog');
-            await template.fetch('catalog/product/view');
+            curlytag.addPath('catalog', '/themes/catalog');
+            await curlytag.fetch('catalog/product/view');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/catalog/product/view.html',
                 'utf-8'
@@ -73,8 +73,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('first segment namespace exact match produces no suffix', async () => {
-            template.addPath('catalog', '/themes/catalog');
-            await template.fetch('catalog');
+            curlytag.addPath('catalog', '/themes/catalog');
+            await curlytag.fetch('catalog');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/catalog.html',
                 'utf-8'
@@ -82,8 +82,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('first segment namespace one nested segment', async () => {
-            template.addPath('admin', '/var/admin');
-            await template.fetch('admin/dashboard');
+            curlytag.addPath('admin', '/var/admin');
+            await curlytag.fetch('admin/dashboard');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/var/admin/dashboard.html',
                 'utf-8'
@@ -91,8 +91,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('first segment namespace three nested segments', async () => {
-            template.addPath('account', '/themes/account');
-            await template.fetch('account/orders/detail');
+            curlytag.addPath('account', '/themes/account');
+            await curlytag.fetch('account/orders/detail');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/account/orders/detail.html',
                 'utf-8'
@@ -100,8 +100,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('deep namespace mid depth match builds correct path', async () => {
-            template.addPath('catalog/product', '/themes/product');
-            await template.fetch('catalog/product/view');
+            curlytag.addPath('catalog/product', '/themes/product');
+            await curlytag.fetch('catalog/product/view');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/product/view.html',
                 'utf-8'
@@ -109,8 +109,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('deep namespace exact match produces no suffix', async () => {
-            template.addPath('catalog/product', '/themes/product');
-            await template.fetch('catalog/product');
+            curlytag.addPath('catalog/product', '/themes/product');
+            await curlytag.fetch('catalog/product');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/product.html',
                 'utf-8'
@@ -118,9 +118,9 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('most specific namespace wins when multiple namespaces match', async () => {
-            template.addPath('catalog', '/themes/catalog');
-            template.addPath('catalog/product', '/themes/product');
-            await template.fetch('catalog/product/view');
+            curlytag.addPath('catalog', '/themes/catalog');
+            curlytag.addPath('catalog/product', '/themes/product');
+            await curlytag.fetch('catalog/product/view');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/product/view.html',
                 'utf-8'
@@ -128,9 +128,9 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('shallower namespace wins when deep namespace does not match', async () => {
-            template.addPath('catalog', '/themes/catalog');
-            template.addPath('catalog/product', '/themes/product');
-            await template.fetch('catalog/category/list');
+            curlytag.addPath('catalog', '/themes/catalog');
+            curlytag.addPath('catalog/product', '/themes/product');
+            await curlytag.fetch('catalog/category/list');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/catalog/category/list.html',
                 'utf-8'
@@ -138,9 +138,9 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('falls back to directory when no namespace matches', async () => {
-            template.directory = '/templates/';
-            template.addPath('catalog', '/themes/catalog');
-            await template.fetch('admin/dashboard');
+            curlytag.directory = '/templates/';
+            curlytag.addPath('catalog', '/themes/catalog');
+            await curlytag.fetch('admin/dashboard');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/admin/dashboard.html',
                 'utf-8'
@@ -148,23 +148,23 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('namespace does not affect path with different prefix', async () => {
-            template.addPath('shop', '/shop-templates');
-            await template.fetch('blog/post');
+            curlytag.addPath('shop', '/shop-templates');
+            await curlytag.fetch('blog/post');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('blog/post.html', 'utf-8');
         });
 
         test('three namespaces registered correct one is selected', async () => {
-            template.addPath('a', '/dir-a');
-            template.addPath('b', '/dir-b');
-            template.addPath('c', '/dir-c');
-            await template.fetch('b/index');
+            curlytag.addPath('a', '/dir-a');
+            curlytag.addPath('b', '/dir-b');
+            curlytag.addPath('c', '/dir-c');
+            await curlytag.fetch('b/index');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('/dir-b/index.html', 'utf-8');
         });
 
         test('directory is ignored when namespace matches', async () => {
-            template.directory = '/fallback/';
-            template.addPath('catalog', '/themes/catalog');
-            await template.fetch('catalog/view');
+            curlytag.directory = '/fallback/';
+            curlytag.addPath('catalog', '/themes/catalog');
+            await curlytag.fetch('catalog/view');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/catalog/view.html',
                 'utf-8'
@@ -174,33 +174,33 @@ describe('CurlyTag fetch() path construction', () => {
 
     describe('addPath()', () => {
         test('two args register namespace in this.path map', async () => {
-            template.addPath('ns', '/path/to/ns');
-            expect(template.path.has('ns')).toBe(true);
-            expect(template.path.get('ns')).toBe('/path/to/ns');
+            curlytag.addPath('ns', '/path/to/ns');
+            expect(curlytag.path.has('ns')).toBe(true);
+            expect(curlytag.path.get('ns')).toBe('/path/to/ns');
         });
 
         test('one arg sets this.directory', async () => {
-            template.addPath('/base/');
-            expect(template.directory).toBe('/base/');
+            curlytag.addPath('/base/');
+            expect(curlytag.directory).toBe('/base/');
         });
 
         test('multiple addPath calls with namespaces accumulate independently', async () => {
-            template.addPath('a', '/dir-a');
-            template.addPath('b', '/dir-b');
+            curlytag.addPath('a', '/dir-a');
+            curlytag.addPath('b', '/dir-b');
 
-            await template.fetch('a/file');
+            await curlytag.fetch('a/file');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('/dir-a/file.html', 'utf-8');
 
             vi.mocked(nodefs.readFile).mockClear();
 
-            await template.fetch('b/file');
+            await curlytag.fetch('b/file');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('/dir-b/file.html', 'utf-8');
         });
 
         test('overwriting namespace replaces previous path', async () => {
-            template.addPath('ns', '/old-path');
-            template.addPath('ns', '/new-path');
-            await template.fetch('ns/file');
+            curlytag.addPath('ns', '/old-path');
+            curlytag.addPath('ns', '/new-path');
+            await curlytag.fetch('ns/file');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('/new-path/file.html', 'utf-8');
         });
     });
@@ -210,7 +210,7 @@ describe('CurlyTag fetch() path construction', () => {
             vi.mocked(nodefs.readFile).mockRejectedValue(
                 Object.assign(new Error('ENOENT'), { code: 'ENOENT' })
             );
-            const result = await template.fetch('missing/file');
+            const result = await curlytag.fetch('missing/file');
             expect(result).toBe('');
         });
 
@@ -218,32 +218,32 @@ describe('CurlyTag fetch() path construction', () => {
             vi.mocked(nodefs.readFile).mockRejectedValue(
                 Object.assign(new Error('EACCES'), { code: 'EACCES' })
             );
-            const result = await template.fetch('protected/file');
+            const result = await curlytag.fetch('protected/file');
             expect(result).toBe('');
         });
 
         test('returns content when file exists', async () => {
             vi.mocked(nodefs.readFile).mockResolvedValue('Hello {{ name }}!');
-            const result = await template.fetch('greeting');
+            const result = await curlytag.fetch('greeting');
             expect(result).toBe('Hello {{ name }}!');
         });
     });
 
     describe('edge cases', () => {
         test('empty path with no directory produces just .html', async () => {
-            await template.fetch('');
+            await curlytag.fetch('');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('.html', 'utf-8');
         });
 
         test('empty path with directory produces directory + .html', async () => {
-            template.directory = '/templates/';
-            await template.fetch('');
+            curlytag.directory = '/templates/';
+            await curlytag.fetch('');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('/templates/.html', 'utf-8');
         });
 
         test('leading slash is preserved as part of path', async () => {
-            template.directory = '/templates';
-            await template.fetch('/page');
+            curlytag.directory = '/templates';
+            await curlytag.fetch('/page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/page.html',
                 'utf-8'
@@ -251,8 +251,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('trailing slash is preserved as part of path', async () => {
-            template.directory = '/templates/';
-            await template.fetch('page/');
+            curlytag.directory = '/templates/';
+            await curlytag.fetch('page/');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/page/.html',
                 'utf-8'
@@ -260,8 +260,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('double slashes in path are preserved literally', async () => {
-            template.directory = '/templates/';
-            await template.fetch('sub//page');
+            curlytag.directory = '/templates/';
+            await curlytag.fetch('sub//page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/sub//page.html',
                 'utf-8'
@@ -269,8 +269,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('path with dot segments is preserved literally', async () => {
-            template.directory = '/templates/';
-            await template.fetch('sub/./page');
+            curlytag.directory = '/templates/';
+            await curlytag.fetch('sub/./page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/sub/./page.html',
                 'utf-8'
@@ -278,20 +278,20 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('namespace matches full segment only not prefix', async () => {
-            template.addPath('cat', '/short');
-            await template.fetch('catalog/page');
+            curlytag.addPath('cat', '/short');
+            await curlytag.fetch('catalog/page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('catalog/page.html', 'utf-8');
         });
 
         test('namespace with trailing slash in stored path is preserved', async () => {
-            template.addPath('ns', '/dir/');
-            await template.fetch('ns/page');
+            curlytag.addPath('ns', '/dir/');
+            await curlytag.fetch('ns/page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith('/dir//page.html', 'utf-8');
         });
 
         test('path containing dots in filename is preserved', async () => {
-            template.directory = '/templates/';
-            await template.fetch('page.v2');
+            curlytag.directory = '/templates/';
+            await curlytag.fetch('page.v2');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/page.v2.html',
                 'utf-8'
@@ -299,8 +299,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('path with spaces is preserved literally', async () => {
-            template.directory = '/templates/';
-            await template.fetch('my page');
+            curlytag.directory = '/templates/';
+            await curlytag.fetch('my page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/my page.html',
                 'utf-8'
@@ -308,8 +308,8 @@ describe('CurlyTag fetch() path construction', () => {
         });
 
         test('path with unicode characters is preserved', async () => {
-            template.directory = '/templates/';
-            await template.fetch('страница');
+            curlytag.directory = '/templates/';
+            await curlytag.fetch('страница');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/страница.html',
                 'utf-8'

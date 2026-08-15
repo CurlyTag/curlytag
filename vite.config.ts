@@ -32,7 +32,7 @@ export default defineConfig({
             {
                 resolve: {
                     alias: {
-                        '#curlytag': new URL('./curlytag.js', import.meta.url).pathname,
+                        '#curlytag': new URL('./tests/helpers/curlytag.js', import.meta.url).pathname,
                         '#fixtures': new URL('./tests/fixtures', import.meta.url).pathname,
                     },
                 },
@@ -45,7 +45,7 @@ export default defineConfig({
             {
                 resolve: {
                     alias: {
-                        '#curlytag': new URL('./curlytag.js', import.meta.url).pathname,
+                        '#curlytag': new URL('./tests/helpers/curlytag.js', import.meta.url).pathname,
                     },
                 },
                 test: {

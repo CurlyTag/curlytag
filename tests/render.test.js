@@ -1,10 +1,37 @@
-import { beforeEach, describe, expect, test } from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vite-plus/test';
 import { curlytag } from '#curlytag';
+import loopTemplate from '../playground/examples/loop/template.html?raw';
+import conditionsTemplate from '../playground/examples/conditions/template.html?raw';
+import filtersTemplate from '../playground/examples/filters/template.html?raw';
+import nestedTemplate from '../playground/examples/nested/template.html?raw';
 
-describe('render (Node.js)', () => {
+const templates = new Map([
+    [ '/templates/examples/loop/template.html', loopTemplate ],
+    [ '/templates/examples/conditions/template.html', conditionsTemplate ],
+    [ '/templates/examples/filters/template.html', filtersTemplate ],
+    [ '/templates/examples/nested/template.html', nestedTemplate ]
+]);
+
+const resetCurlytag = () => {
+    curlytag.directory = '';
+    curlytag.path.clear();
+    curlytag.cache.clear();
+};
+
+describe('render (browser)', () => {
     beforeEach(() => {
-        curlytag.addPath('playground/');
-        curlytag.cache.clear();
+        resetCurlytag();
+        curlytag.directory = '/templates/';
+        vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
+            const template = templates.get(String(url));
+
+            return new Response(template ?? '', { status: template === undefined ? 404 : 200 });
+        });
+    });
+
+    afterEach(() => {
+        resetCurlytag();
+        vi.restoreAllMocks();
     });
 
     test('render() loads a loop template and renders items', async () => {
@@ -72,6 +99,7 @@ describe('render (Node.js)', () => {
         expect(curlytag.cache.has('examples/loop/template')).toBe(true);
         const result = await curlytag.render('examples/loop/template', { team: [ 'Bob' ] });
         expect(result).toContain('Bob');
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     });
 
     test('render() returns empty string for non-existent file', async () => {

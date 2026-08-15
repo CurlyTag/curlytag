@@ -52,8 +52,8 @@ describe('capitalize', () => {
         expect(curlytag.parse('{{ name | capitalize }}', { name: null })).toBe('');
     });
 
-    test('undefined variable returns empty string', () => {
-        expect(curlytag.parse('{{ name | capitalize }}', {})).toBe('');
+    test('undefined value returns empty string', () => {
+        expect(curlytag.parse('{{ name | capitalize }}', { name: undefined })).toBe('');
     });
 
     test('numeric value is stringified and capitalized', () => {

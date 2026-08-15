@@ -20,6 +20,16 @@ describe('variable output {{ }}', () => {
         expect(curlytag.parse('{{ a.b.c }}', { a: { b: { c: 'deep' } } })).toBe('deep');
     });
 
+    test('four-level nesting', () => {
+        expect(curlytag.parse('{{ catalog.product.manufacturer.name }}', {
+            catalog: { product: { manufacturer: { name: 'OpenCart' } } }
+        })).toBe('OpenCart');
+    });
+
+    test('missing nested value renders as empty string', () => {
+        expect(curlytag.parse('{{ catalog.product.manufacturer.name }}', { catalog: {} })).toBe('');
+    });
+
     test('undefined variable renders as empty string', () => {
         expect(curlytag.parse('{{ missing }}')).toBe('');
     });

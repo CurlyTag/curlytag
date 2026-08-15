@@ -10,6 +10,10 @@ describe('string', () => {
         expect(curlytag.parse('{{ name | lower }}', { name: 'ALICE' })).toBe('alice');
     });
 
+    test('regex does not throw', () => {
+        expect(() => curlytag.parse("{{ value | regex: 'a' }}", { value: 'abc' })).not.toThrow();
+    });
+
     test('replace', () => {
         expect(
             curlytag.parse('{{ greeting | replace: "world", "earth" }}', {

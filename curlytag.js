@@ -719,17 +719,17 @@ export class CurlyTag {
     evaluate(expression, ctx) {
         if (!expression) return undefined;
 
-        expression = expression.replaceAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'(\snot\s)|(\sand\s)|(\sor\s)b/g, (match, not, and, or) => {
+        expression = expression.replaceAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(not)\s+|\b(and)\b|\b(or)\b/g, (match, not, and, or) => {
             if (not) {
-                return ' !';
+                return '!';
             }
 
             if (and) {
-                return ' && ';
+                return '&&';
             }
 
             if (or) {
-                return ' || ';
+                return '||';
             }
 
             return match;

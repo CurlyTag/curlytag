@@ -74,6 +74,16 @@ describe('operators', () => {
         });
     });
 
+    describe('string literals', () => {
+        test('does not transform operators inside double-quoted strings', () => {
+            expect(curlytag.parse('{% if label == "not and or" %}yes{% endif %}', { label: 'not and or' })).toBe('yes');
+        });
+
+        test('does not transform operators inside single-quoted strings', () => {
+            expect(curlytag.parse("{% if label == 'not and or' %}yes{% endif %}", { label: 'not and or' })).toBe('yes');
+        });
+    });
+
     describe('combined', () => {
         test('comparison combined with and', () => {
             expect(curlytag.parse('{% if x > 0 and x < 10 %}yes{% endif %}', { x: 5 })).toBe('yes');

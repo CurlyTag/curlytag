@@ -40,7 +40,7 @@ export class CurlyTag {
             raw: this.handleRaw.bind(this),
             endraw: this.handleEndraw.bind(this),
             comment: this.handleComment.bind(this),
-            endcomment: this.handleEndcomment.bind(this),
+            endcomment: this.handleEndcomment.bind(this)
         };
 
         this.openclose = {
@@ -84,7 +84,7 @@ export class CurlyTag {
             unless: [
                 'else',
                 'endunless'
-            ],
+            ]
         };
 
         this.operator = {
@@ -159,10 +159,9 @@ export class CurlyTag {
                 var args = arguments, string = args[0], i = 1;
 
                 return string.replace(/%(%|s|d)/g, test);
-
             },
             capitalize: (value) => {
-                let chars = [...String(value ?? '')];
+                let chars = [ ...String(value ?? '') ];
 
                 if (!chars.length) {
                     return '';
@@ -317,7 +316,7 @@ export class CurlyTag {
             sort: (value, key = null, direction = 'asc') => {
                 const dir = direction === 'desc' ? -1 : 1;
 
-                return [...value].sort((a, b) => {
+                return [ ...value ].sort((a, b) => {
                     let va = key ? a?.[key] : a;
                     let vb = key ? b?.[key] : b;
 
@@ -397,7 +396,7 @@ export class CurlyTag {
             },
             reverse: (value) => {
                 if (Array.isArray(value)) {
-                    return [...value].reverse();
+                    return [ ...value ].reverse();
                 }
 
                 if (typeof value === 'string') {
@@ -427,7 +426,7 @@ export class CurlyTag {
                 return value.filter((item) => item != null);
             },
             uniq: (value) => {
-                return [...new Set(value)];
+                return [ ...new Set(value) ];
             },
             map: (value, property) => {
                 return value.map((item) => item?.[property]);
@@ -495,7 +494,7 @@ export class CurlyTag {
                 } catch {
                     return '';
                 }
-            },
+            }
         };
     }
 
@@ -643,7 +642,7 @@ export class CurlyTag {
         let regex = /\{\{-?\s([\s\S]*?)\s-?\}\}|\{%-?\s([\s\S]*?)\s-?%}|\{#\s([\s\S]*?)\s#\}/g;
 
         while ((match = regex.exec(template)) !== null) {
-            let [raw, output, tag, comment] = match;
+            let [ raw, output, tag, comment ] = match;
 
             let line = template.substring(0, match.index).split(/\r\n|\r|\n/).length;
 
@@ -781,14 +780,14 @@ export class CurlyTag {
 
         let result = value;
 
-        let filters = expression.indexOf('|') !== -1 ? expression.split('|').map((value) => value.trim()) : [expression];
+        let filters = expression.indexOf('|') !== -1 ? expression.split('|').map((value) => value.trim()) : [ expression ];
 
         for (let filter of filters) {
             let match = filter.match(/^([^:]*):?\s?(.+)?$/);
 
             if (!match) return;
 
-            let [, name, argument] = match;
+            let [ , name, argument ] = match;
 
             let args = [];
 
@@ -829,7 +828,7 @@ export class CurlyTag {
             console.log(`[Template] Invalid output line ${token.line} column ${token.column}`);
         }
 
-        let [, name, filter] = match;
+        let [ , name, filter ] = match;
 
         let value = this.evaluate(name, ctx);
 
@@ -866,7 +865,7 @@ export class CurlyTag {
             return;
         }
 
-        let [, name, expression, filter] = match;
+        let [ , name, expression, filter ] = match;
 
         let value = this.evaluate(expression, ctx);
 
@@ -905,7 +904,7 @@ export class CurlyTag {
             return;
         }
 
-        let [, name, filter] = match;
+        let [ , name, filter ] = match;
 
         let value = this.evaluate(name, ctx);
 
@@ -916,7 +915,7 @@ export class CurlyTag {
 
         stack.push({
             type: 'output',
-            output: value,
+            output: value
         });
     }
 
@@ -967,7 +966,7 @@ export class CurlyTag {
 
         stack.push({
             type: 'output',
-            output: values[state.index],
+            output: values[state.index]
         });
     }
 
@@ -998,7 +997,7 @@ export class CurlyTag {
 
         stack.push({
             type: 'if',
-            active: active,
+            active: active
         });
 
         if (!active) return token.end;
@@ -1043,7 +1042,7 @@ export class CurlyTag {
 
         stack.push({
             type: 'unless',
-            active: active,
+            active: active
         });
 
         if (!active) return token.end;
@@ -1115,7 +1114,7 @@ export class CurlyTag {
             return;
         }
 
-        let [, name, key, filter] = match;
+        let [ , name, key, filter ] = match;
 
         // Match any global function
         let items = this.evaluate(key, ctx);
@@ -1139,7 +1138,7 @@ export class CurlyTag {
             start: index + 1,
             end: endIndex,
             active: items.length > 0,
-            parent: { ...ctx },
+            parent: { ...ctx }
         });
 
         return items.length > 0 ? endIndex : token.end;
@@ -1170,7 +1169,7 @@ export class CurlyTag {
                 last: top.index === top.items.length - 1,
                 length: top.items.length,
                 rindex: top.items.length - top.index,
-                rindex0: top.items.length - top.index - 1,
+                rindex0: top.items.length - top.index - 1
             };
 
             return top.start;
@@ -1236,7 +1235,7 @@ export class CurlyTag {
         stack.push({
             type: 'case',
             value: match[1],
-            active: false,
+            active: false
         });
     }
 
@@ -1287,7 +1286,7 @@ export class CurlyTag {
         stack.push({
             type: 'capture',
             name: match[1],
-            value: '',
+            value: ''
         });
     }
 
@@ -1308,7 +1307,7 @@ export class CurlyTag {
     handleRaw(token, stack, ctx, index) {
         stack.push({
             type: 'raw',
-            end: token.end,
+            end: token.end
         });
     }
 
@@ -1354,7 +1353,7 @@ export class CurlyTag {
         stack.push({
             type: 'capture',
             filter: match[1],
-            value: '',
+            value: ''
         });
     }
 
@@ -1371,7 +1370,7 @@ export class CurlyTag {
 
         stack.push({
             type: 'output',
-            output: this.parseFilter(top.value, top.filter, ctx),
+            output: this.parseFilter(top.value, top.filter, ctx)
         });
     }
 

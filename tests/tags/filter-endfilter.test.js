@@ -8,7 +8,7 @@ describe('filter / endfilter', () => {
 
     test('filter block followed by more content', () => {
         expect(template.parse('before {% filter upper %}hello{% endfilter %} after')).toBe(
-            'before HELLO after',
+            'before HELLO after'
         );
     });
 
@@ -19,22 +19,22 @@ describe('filter / endfilter', () => {
     test('applies filter to block with variable inside', () => {
         expect(
             template.parse('{% filter upper %}{{ name }}{% endfilter %} end', {
-                name: 'alice',
-            }),
+                name: 'alice'
+            })
         ).toBe('ALICE end');
     });
 
     test('applies filter to multiline block', () => {
         expect(template.parse('{% filter upper %}hello\nworld{% endfilter %} end')).toBe(
-            'HELLO\nWORLD end',
+            'HELLO\nWORLD end'
         );
     });
 
     test('filter block with mixed static and variable content', () => {
         expect(
             template.parse('{% filter upper %}hello {{ name }}{% endfilter %} end', {
-                name: 'world',
-            }),
+                name: 'world'
+            })
         ).toBe('HELLO WORLD end');
     });
 
@@ -48,7 +48,7 @@ describe('filter / endfilter', () => {
 
     test('filter block with variable as last token', () => {
         expect(
-            template.parse('{% filter upper %}{{ name }}{% endfilter %}', { name: 'alice' }),
+            template.parse('{% filter upper %}{{ name }}{% endfilter %}', { name: 'alice' })
         ).toBe('ALICE');
     });
 

@@ -44,13 +44,13 @@ describe('echo', () => {
 
     test('outputs false when echo is followed by a tag', () => {
         expect(template.parse('{% echo b %}{% if true %}yes{% endif %}', { b: false })).toBe(
-            'falseyes',
+            'falseyes'
         );
     });
 
     test('outputs prefix + echo when echo is not last', () => {
         expect(template.parse('prefix: {% echo greeting %}!', { greeting: 'hello' })).toBe(
-            'prefix: hello!',
+            'prefix: hello!'
         );
     });
 });

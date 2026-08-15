@@ -14,7 +14,7 @@ describe('CurlyTag - browser fetch()', () => {
 
     test('fetches template via window.fetch and renders it', async () => {
         vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-            new Response('Hello {{ name }}!', { status: 200 }),
+            new Response('Hello {{ name }}!', { status: 200 })
         );
 
         const result = await template.render('greeting', { name: 'World' });
@@ -25,7 +25,7 @@ describe('CurlyTag - browser fetch()', () => {
 
     test('returns empty string when fetch responds with 404', async () => {
         vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-            new Response('Not Found', { status: 404 }),
+            new Response('Not Found', { status: 404 })
         );
 
         const result = await template.render('missing', {});
@@ -35,7 +35,7 @@ describe('CurlyTag - browser fetch()', () => {
 
     test('caches template after first fetch and does not re-fetch', async () => {
         vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-            new Response('Cached: {{ value }}', { status: 200 }),
+            new Response('Cached: {{ value }}', { status: 200 })
         );
 
         await template.render('cached', { value: 'one' });

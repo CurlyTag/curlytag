@@ -4,25 +4,25 @@ import { template } from '#curlytag';
 describe('strip_newlines', () => {
     test('removes unix newlines', () => {
         expect(template.parse('{{ text | strip_newlines }}', { text: 'hello\nworld' })).toBe(
-            'helloworld',
+            'helloworld'
         );
     });
 
     test('removes windows newlines', () => {
         expect(template.parse('{{ text | strip_newlines }}', { text: 'hello\r\nworld' })).toBe(
-            'helloworld',
+            'helloworld'
         );
     });
 
     test('removes old mac newlines', () => {
         expect(template.parse('{{ text | strip_newlines }}', { text: 'hello\rworld' })).toBe(
-            'helloworld',
+            'helloworld'
         );
     });
 
     test('removes multiple newlines', () => {
         expect(
-            template.parse('{{ text | strip_newlines }}', { text: 'a\nb\r\nc\rd' }),
+            template.parse('{{ text | strip_newlines }}', { text: 'a\nb\r\nc\rd' })
         ).toBe('abcd');
     });
 
@@ -32,7 +32,7 @@ describe('strip_newlines', () => {
 
     test('string without newlines is unchanged', () => {
         expect(template.parse('{{ text | strip_newlines }}', { text: 'hello world' })).toBe(
-            'hello world',
+            'hello world'
         );
     });
 
@@ -54,7 +54,7 @@ describe('strip_newlines', () => {
 
     test('chains with other filters', () => {
         expect(
-            template.parse('{{ text | strip_newlines | upper }}', { text: 'hello\nworld' }),
+            template.parse('{{ text | strip_newlines | upper }}', { text: 'hello\nworld' })
         ).toBe('HELLOWORLD');
     });
 });

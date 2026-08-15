@@ -8,12 +8,12 @@ describe('size', () => {
 
     test('returns character count of a longer string', () => {
         expect(
-            template.parse('{{ value | size }}', { value: 'Ground control to Major Tom.' }),
+            template.parse('{{ value | size }}', { value: 'Ground control to Major Tom.' })
         ).toBe('28');
     });
 
     test('returns length of an array', () => {
-        expect(template.parse('{{ items | size }}', { items: [1, 2, 3, 4] })).toBe('4');
+        expect(template.parse('{{ items | size }}', { items: [ 1, 2, 3, 4 ] })).toBe('4');
     });
 
     test('returns 0 for empty string', () => {
@@ -29,9 +29,9 @@ describe('size', () => {
     });
 
     test('behaves identically to length', () => {
-        const data = { items: ['a', 'b', 'c'] };
+        const data = { items: [ 'a', 'b', 'c' ] };
         expect(template.parse('{{ items | size }}', data)).toBe(
-            template.parse('{{ items | length }}', data),
+            template.parse('{{ items | length }}', data)
         );
     });
 });

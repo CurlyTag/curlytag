@@ -13,8 +13,8 @@ describe('string', () => {
     test('replace', () => {
         expect(
             template.parse('{{ greeting | replace: "world", "earth" }}', {
-                greeting: 'hello world',
-            }),
+                greeting: 'hello world'
+            })
         ).toBe('hello earth');
     });
 
@@ -24,7 +24,7 @@ describe('string', () => {
 
     test('truncate', () => {
         expect(template.parse('{{ name | upper | truncate: 3, "." }}', { name: 'alice' })).toBe(
-            'AL.',
+            'AL.'
         );
     });
 
@@ -34,21 +34,21 @@ describe('string', () => {
 
     test('striptag removes script block including contents', () => {
         expect(
-            template.parse('{{ html | striptag }}', { html: "<script>alert('xss')</script>hello" }),
+            template.parse('{{ html | striptag }}', { html: "<script>alert('xss')</script>hello" })
         ).toBe('hello');
     });
 
     test('striptag removes style block including contents', () => {
         expect(
             template.parse('{{ html | striptag }}', {
-                html: '<style>body{color:red}</style>hello',
-            }),
+                html: '<style>body{color:red}</style>hello'
+            })
         ).toBe('hello');
     });
 
     test('striptag removes html comments', () => {
         expect(template.parse('{{ html | striptag }}', { html: '<!-- comment -->hello' })).toBe(
-            'hello',
+            'hello'
         );
     });
 

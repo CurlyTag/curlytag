@@ -3,7 +3,7 @@ import * as nodefs from 'node:fs/promises';
 import { template } from '#curlytag';
 
 vi.mock('node:fs/promises', () => ({
-    readFile: vi.fn(),
+    readFile: vi.fn()
 }));
 
 describe('CurlyTag fetch() path construction', () => {
@@ -24,7 +24,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('greeting');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/greeting.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -33,7 +33,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('sub/page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/sub/page.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -42,7 +42,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('admin/user/list');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/var/www/views/admin/user/list.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -51,7 +51,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('index');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/my/templates/index.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -68,7 +68,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('catalog/product/view');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/catalog/product/view.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -77,7 +77,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('catalog');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/catalog.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -86,7 +86,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('admin/dashboard');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/var/admin/dashboard.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -95,7 +95,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('account/orders/detail');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/account/orders/detail.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -104,7 +104,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('catalog/product/view');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/product/view.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -113,7 +113,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('catalog/product');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/product.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -123,7 +123,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('catalog/product/view');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/product/view.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -133,7 +133,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('catalog/category/list');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/catalog/category/list.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -143,7 +143,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('admin/dashboard');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/admin/dashboard.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -167,7 +167,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('catalog/view');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/themes/catalog/view.html',
-                'utf-8',
+                'utf-8'
             );
         });
     });
@@ -208,7 +208,7 @@ describe('CurlyTag fetch() path construction', () => {
     describe('error handling', () => {
         test('returns empty string when file does not exist', async () => {
             vi.mocked(nodefs.readFile).mockRejectedValue(
-                Object.assign(new Error('ENOENT'), { code: 'ENOENT' }),
+                Object.assign(new Error('ENOENT'), { code: 'ENOENT' })
             );
             const result = await template.fetch('missing/file');
             expect(result).toBe('');
@@ -216,7 +216,7 @@ describe('CurlyTag fetch() path construction', () => {
 
         test('returns empty string when file read throws permission error', async () => {
             vi.mocked(nodefs.readFile).mockRejectedValue(
-                Object.assign(new Error('EACCES'), { code: 'EACCES' }),
+                Object.assign(new Error('EACCES'), { code: 'EACCES' })
             );
             const result = await template.fetch('protected/file');
             expect(result).toBe('');
@@ -246,7 +246,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('/page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/page.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -255,7 +255,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('page/');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/page/.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -264,7 +264,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('sub//page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/sub//page.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -273,7 +273,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('sub/./page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/sub/./page.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -294,7 +294,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('page.v2');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/page.v2.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -303,7 +303,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('my page');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/my page.html',
-                'utf-8',
+                'utf-8'
             );
         });
 
@@ -312,7 +312,7 @@ describe('CurlyTag fetch() path construction', () => {
             await template.fetch('страница');
             expect(vi.mocked(nodefs.readFile)).toHaveBeenCalledWith(
                 '/templates/страница.html',
-                'utf-8',
+                'utf-8'
             );
         });
     });

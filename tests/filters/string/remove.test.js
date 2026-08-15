@@ -4,7 +4,7 @@ import { template } from '#curlytag';
 describe('remove', () => {
     test('removes all occurrences of a substring', () => {
         expect(template.parse('{{ value | remove: "o" }}', { value: 'hello world' })).toBe(
-            'hell wrld',
+            'hell wrld'
         );
     });
 
@@ -52,19 +52,19 @@ describe('remove', () => {
 describe('remove_first', () => {
     test('removes only the first occurrence', () => {
         expect(template.parse('{{ value | remove_first: "o" }}', { value: 'hello world' })).toBe(
-            'hell world',
+            'hell world'
         );
     });
 
     test('does not remove subsequent occurrences', () => {
         expect(template.parse('{{ value | remove_first: "a" }}', { value: 'banana' })).toBe(
-            'bnana',
+            'bnana'
         );
     });
 
     test('returns original string when substring not found', () => {
         expect(template.parse('{{ value | remove_first: "z" }}', { value: 'hello' })).toBe(
-            'hello',
+            'hello'
         );
     });
 
@@ -92,13 +92,13 @@ describe('remove_first', () => {
 describe('remove_last', () => {
     test('removes only the last occurrence', () => {
         expect(template.parse('{{ value | remove_last: "o" }}', { value: 'hello world' })).toBe(
-            'hello wrld',
+            'hello wrld'
         );
     });
 
     test('does not remove earlier occurrences', () => {
         expect(template.parse('{{ value | remove_last: "a" }}', { value: 'banana' })).toBe(
-            'banan',
+            'banan'
         );
     });
 

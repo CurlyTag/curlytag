@@ -14,8 +14,8 @@ describe('CurlyTag - multi-line templates', () => {
                     name: 'Widget',
                     price: 19.995,
                     in_stock: true,
-                    tags: ['new', 'sale'],
-                },
+                    tags: [ 'new', 'sale' ]
+                }
             });
 
             expect(result).toContain('WIDGET');
@@ -32,8 +32,8 @@ describe('CurlyTag - multi-line templates', () => {
                     name: 'Gadget',
                     price: 5.5,
                     in_stock: false,
-                    tags: null,
-                },
+                    tags: null
+                }
             });
 
             expect(result).toContain('GADGET');
@@ -48,7 +48,7 @@ describe('CurlyTag - multi-line templates', () => {
 
         test('renders rows with loop.index and default role', () => {
             const result = template.parse(tpl, {
-                users: [{ name: 'Alice', role: 'admin' }, { name: 'Bob' }],
+                users: [ { name: 'Alice', role: 'admin' }, { name: 'Bob' } ]
             });
 
             expect(result).toContain('<td>1</td>');
@@ -75,8 +75,8 @@ describe('CurlyTag - multi-line templates', () => {
                 user: {
                     name: 'Root',
                     is_admin: true,
-                    permissions: ['read', 'write', 'delete'],
-                },
+                    permissions: [ 'read', 'write', 'delete' ]
+                }
             });
 
             expect(result).toContain('Root');
@@ -93,8 +93,8 @@ describe('CurlyTag - multi-line templates', () => {
                 user: {
                     name: 'Mod',
                     is_admin: false,
-                    is_moderator: true,
-                },
+                    is_moderator: true
+                }
             });
 
             expect(result).toContain('Moderator');
@@ -106,8 +106,8 @@ describe('CurlyTag - multi-line templates', () => {
                 user: {
                     name: 'Guest',
                     is_admin: false,
-                    is_moderator: false,
-                },
+                    is_moderator: false
+                }
             });
 
             expect(result).toContain('<span class="role">User</span>');

@@ -3,8 +3,8 @@ import { template } from '#curlytag';
 
 describe('case / when / endcase', () => {
     test('matches correct when branch', () => {
-        const tpl =
-            '{% case color %}{% when "red" %}R{% when "green" %}G{% when "blue" %}B{% endcase %}';
+        const tpl
+            = '{% case color %}{% when "red" %}R{% when "green" %}G{% when "blue" %}B{% endcase %}';
         expect(template.parse(tpl, { color: 'green' })).toBe('G');
     });
 
@@ -39,8 +39,8 @@ describe('case / when / endcase', () => {
     });
 
     test('two level dotted path resolves correctly', () => {
-        const tpl =
-            '{% case order.status.code %}{% when "paid" %}P{% when "pending" %}W{% endcase %}';
+        const tpl
+            = '{% case order.status.code %}{% when "paid" %}P{% when "pending" %}W{% endcase %}';
         expect(template.parse(tpl, { order: { status: { code: 'pending' } } })).toBe('W');
     });
 
@@ -50,10 +50,10 @@ describe('case / when / endcase', () => {
     });
 
     test('deeply nested path with multiple when values', () => {
-        const tpl =
-            '{% case user.profile.settings.theme %}{% when "dark", "black" %}D{% when "light" %}L{% endcase %}';
+        const tpl
+            = '{% case user.profile.settings.theme %}{% when "dark", "black" %}D{% when "light" %}L{% endcase %}';
         expect(template.parse(tpl, { user: { profile: { settings: { theme: 'black' } } } })).toBe(
-            'D',
+            'D'
         );
     });
 

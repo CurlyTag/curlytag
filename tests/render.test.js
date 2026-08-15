@@ -9,7 +9,7 @@ describe('render (Node.js)', () => {
 
     test('render() loads a loop template and renders items', async () => {
         const result = await template.render('examples/loop/template', {
-            team: ['Alice', 'Bob', 'Carol'],
+            team: [ 'Alice', 'Bob', 'Carol' ]
         });
         expect(result).toContain('Alice');
         expect(result).toContain('Bob');
@@ -17,7 +17,7 @@ describe('render (Node.js)', () => {
     });
 
     test('render() loop template renders loop.index correctly', async () => {
-        const result = await template.render('examples/loop/template', { team: ['Alice'] });
+        const result = await template.render('examples/loop/template', { team: [ 'Alice' ] });
         expect(result).toContain('1. Alice');
     });
 
@@ -30,7 +30,7 @@ describe('render (Node.js)', () => {
 
     test('render() loads a conditions template — elseif branch', async () => {
         const result = await template.render('examples/conditions/template', {
-            role: 'editor',
+            role: 'editor'
         });
         expect(result).toContain('Editor access');
         expect(result).not.toContain('Admin access');
@@ -46,7 +46,7 @@ describe('render (Node.js)', () => {
             title: 'hello',
             greeting: 'Hello world',
             price: 9.999,
-            tags: ['js', 'html'],
+            tags: [ 'js', 'html' ]
         });
         expect(result).toContain('HELLO');
         expect(result).toContain('Hey world');
@@ -57,9 +57,9 @@ describe('render (Node.js)', () => {
         const result = await template.render('examples/nested/template', {
             title: 'Team',
             users: [
-                { name: 'Alice', active: true, roles: ['admin'] },
-                { name: 'Bob', active: false, roles: ['editor'] },
-            ],
+                { name: 'Alice', active: true, roles: [ 'admin' ] },
+                { name: 'Bob', active: false, roles: [ 'editor' ] }
+            ]
         });
         expect(result).toContain('Alice');
         expect(result).toContain('ADMIN');
@@ -68,9 +68,9 @@ describe('render (Node.js)', () => {
     });
 
     test('render() caches the template on second call', async () => {
-        await template.render('examples/loop/template', { team: ['Alice'] });
+        await template.render('examples/loop/template', { team: [ 'Alice' ] });
         expect(template.cache.has('examples/loop/template')).toBe(true);
-        const result = await template.render('examples/loop/template', { team: ['Bob'] });
+        const result = await template.render('examples/loop/template', { team: [ 'Bob' ] });
         expect(result).toContain('Bob');
     });
 

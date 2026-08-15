@@ -8,7 +8,7 @@ describe('misc', () => {
 
     test('chained filters', () => {
         expect(template.parse('{{ name | upper | truncate: 3, "." }}', { name: 'alice' })).toBe(
-            'AL.',
+            'AL.'
         );
     });
 

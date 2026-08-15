@@ -28,6 +28,12 @@ export default defineConfig({
         },
     },
     test: {
+        coverage: {
+            provider: 'istanbul',
+            include: [new URL('./curlytag.js', import.meta.url).pathname],
+            allowExternal: true,
+            reporter: ['text', 'html', 'lcov'],
+        },
         projects: [
             {
                 resolve: {

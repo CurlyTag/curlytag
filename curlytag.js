@@ -368,7 +368,7 @@ export class CurlyTag {
                 return copy;
             },
             slice: (value, start, end) => {
-                if (typeof value !== 'string' && typeof value !== 'array') return;
+                if (typeof value !== 'string' && !Array.isArray(value)) return;
 
                 return end !== undefined ? value.slice(start, end) : value.slice(start);
             },

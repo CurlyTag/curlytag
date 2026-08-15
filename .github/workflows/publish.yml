@@ -9,13 +9,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: '24'
           cache: true
       - run: vp install
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -30,13 +30,13 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: '24'
           cache: true
       - run: vp install
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'

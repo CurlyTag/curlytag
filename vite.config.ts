@@ -18,6 +18,7 @@ export default defineConfig({
     },
     staged: {
         '*': 'vp check --fix',
+        '**/*.js': 'vp exec eslint --fix',
     },
     lint: {
         ignorePatterns: ['docs/.vitepress/cache/**'],
@@ -64,6 +65,7 @@ export default defineConfig({
         tabWidth: 4,
         singleQuote: true,
         ignorePatterns: [
+            '**/*.js',
             '**/*.md',
             '**/*.yml',
             '**/*.yaml',

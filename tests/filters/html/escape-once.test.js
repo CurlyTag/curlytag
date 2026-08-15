@@ -4,31 +4,31 @@ import { template } from '#curlytag';
 describe('escape_once', () => {
     test('escapes unescaped HTML', () => {
         expect(
-            template.parse('{{ value | escape_once }}', { value: '<b>hello</b>' }),
+            template.parse('{{ value | escape_once }}', { value: '<b>hello</b>' })
         ).toBe('&amp;lt;b&amp;gt;hello&amp;lt;/b&amp;gt;');
     });
 
     test('does not double escape already escaped string', () => {
         expect(
-            template.parse('{{ value | escape_once }}', { value: '&lt;b&gt;hello&lt;/b&gt;' }),
+            template.parse('{{ value | escape_once }}', { value: '&lt;b&gt;hello&lt;/b&gt;' })
         ).toBe('&amp;lt;b&amp;gt;hello&amp;lt;/b&amp;gt;');
     });
 
     test('escapes mixed partially escaped string', () => {
         expect(
-            template.parse('{{ value | escape_once }}', { value: '&lt;b&gt;<i>hello</i>' }),
+            template.parse('{{ value | escape_once }}', { value: '&lt;b&gt;<i>hello</i>' })
         ).toBe('&amp;lt;b&amp;gt;&amp;lt;i&amp;gt;hello&amp;lt;/i&amp;gt;');
     });
 
     test('does not double escape ampersand', () => {
         expect(
-            template.parse('{{ value | escape_once }}', { value: '&amp;' }),
+            template.parse('{{ value | escape_once }}', { value: '&amp;' })
         ).toBe('&amp;amp;');
     });
 
     test('escapes raw ampersand', () => {
         expect(
-            template.parse('{{ value | escape_once }}', { value: 'a & b' }),
+            template.parse('{{ value | escape_once }}', { value: 'a & b' })
         ).toBe('a &amp;amp; b');
     });
 
@@ -40,19 +40,19 @@ describe('escape_once', () => {
 
     test('handles empty string', () => {
         expect(
-            template.parse('{{ value | escape_once }}', { value: '' }),
+            template.parse('{{ value | escape_once }}', { value: '' })
         ).toBe('');
     });
 
     test('handles null', () => {
         expect(
-            template.parse('{{ value | escape_once }}', { value: null }),
+            template.parse('{{ value | escape_once }}', { value: null })
         ).toBe('');
     });
 
     test('handles plain text without special chars', () => {
         expect(
-            template.parse('{{ value | escape_once }}', { value: 'hello world' }),
+            template.parse('{{ value | escape_once }}', { value: 'hello world' })
         ).toBe('hello world');
     });
 });

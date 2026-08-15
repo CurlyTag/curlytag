@@ -20,7 +20,7 @@ jobs:
           node-version: '24'
           cache: true
       - run: vp install
-      - run: vp check
+      - run: vp run check
         continue-on-error: true
 
   test:

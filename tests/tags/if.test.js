@@ -12,7 +12,7 @@ describe('if / elseif / else', () => {
 
     test('else branch', () => {
         expect(template.parse('{% if show %}yes{% else %}no{% endif %}', { show: false })).toBe(
-            'no',
+            'no'
         );
     });
 
@@ -40,8 +40,8 @@ describe('if / elseif / else', () => {
     test('valid if after invalid if works correctly', () => {
         expect(
             template.parse('{% if %}bad{% endif %}{% if show %}good{% endif %}', {
-                show: true,
-            }),
+                show: true
+            })
         ).toBe('good');
     });
 

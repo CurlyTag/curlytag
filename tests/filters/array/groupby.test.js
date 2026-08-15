@@ -6,7 +6,7 @@ describe('groupby', () => {
         { name: 'apple', type: 'fruit' },
         { name: 'carrot', type: 'vegetable' },
         { name: 'banana', type: 'fruit' },
-        { name: 'broccoli', type: 'vegetable' },
+        { name: 'broccoli', type: 'vegetable' }
     ];
 
     test('groups items by the specified key', () => {
@@ -17,15 +17,15 @@ describe('groupby', () => {
 
     test('groups items into correct buckets', () => {
         const result = template.filter.groupby(items, 'type');
-        expect(result.fruit.map((i) => i.name)).toEqual(['apple', 'banana']);
-        expect(result.vegetable.map((i) => i.name)).toEqual(['carrot', 'broccoli']);
+        expect(result.fruit.map((i) => i.name)).toEqual([ 'apple', 'banana' ]);
+        expect(result.vegetable.map((i) => i.name)).toEqual([ 'carrot', 'broccoli' ]);
     });
 
     test('groups by a key that is not named type', () => {
         const products = [
             { name: 'shirt', color: 'red' },
             { name: 'hat', color: 'blue' },
-            { name: 'scarf', color: 'red' },
+            { name: 'scarf', color: 'red' }
         ];
         const result = template.filter.groupby(products, 'color');
         expect(result.red).toHaveLength(2);
@@ -36,7 +36,7 @@ describe('groupby', () => {
         const mixed = [
             { name: 'apple', type: 'fruit', category: 'produce' },
             { name: 'gold', type: 'metal', category: 'material' },
-            { name: 'banana', type: 'fruit', category: 'produce' },
+            { name: 'banana', type: 'fruit', category: 'produce' }
         ];
         const result = template.filter.groupby(mixed, 'category');
         expect(result.produce).toHaveLength(2);
@@ -46,7 +46,7 @@ describe('groupby', () => {
     });
 
     test('single item produces one group', () => {
-        const result = template.filter.groupby([{ name: 'apple', type: 'fruit' }], 'type');
+        const result = template.filter.groupby([ { name: 'apple', type: 'fruit' } ], 'type');
         expect(result.fruit).toHaveLength(1);
     });
 
@@ -61,14 +61,14 @@ describe('groupby', () => {
     });
 
     test('works via template assign and property access', () => {
-        const tpl =
-            '{% assign g = items | groupby: "type" %}{{ g.fruit | length }}/{{ g.vegetable | length }}';
+        const tpl
+            = '{% assign g = items | groupby: "type" %}{{ g.fruit | length }}/{{ g.vegetable | length }}';
         expect(template.parse(tpl, { items })).toBe('2/2');
     });
 
     test('group result is accessible in a for loop', () => {
-        const tpl =
-            '{% assign g = items | groupby: "type" %}{% for item in g.fruit %}{{ item.name }} {% endfor %}';
+        const tpl
+            = '{% assign g = items | groupby: "type" %}{% for item in g.fruit %}{{ item.name }} {% endfor %}';
         expect(template.parse(tpl, { items })).toBe('apple banana ');
     });
 });

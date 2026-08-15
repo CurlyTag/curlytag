@@ -4,13 +4,13 @@ import { template } from '#curlytag';
 describe('html', () => {
     test('escape encodes all HTML entities', () => {
         expect(template.parse('{{ v | escape }}', { v: '&<>"\'' })).toBe(
-            '&amp;amp;&amp;lt;&amp;gt;&amp;quot;&amp;#39;',
+            '&amp;amp;&amp;lt;&amp;gt;&amp;quot;&amp;#39;'
         );
     });
 
     test('safe passes value through', () => {
         expect(template.parse('{{ html | safe }}', { html: '<b>bold</b>' })).toBe(
-            '&lt;b&gt;bold&lt;/b&gt;',
+            '&lt;b&gt;bold&lt;/b&gt;'
         );
     });
 

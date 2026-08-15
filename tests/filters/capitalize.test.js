@@ -24,13 +24,13 @@ describe('capitalize', () => {
 
     test('works in chain with other filters', () => {
         expect(template.parse('{{ name | trim | capitalize }}', { name: '  hello world  ' })).toBe(
-            'Hello world',
+            'Hello world'
         );
     });
 
     test('works as part of output with other text', () => {
         expect(template.parse('Hello, {{ name | capitalize }}!', { name: 'world' })).toBe(
-            'Hello, World!',
+            'Hello, World!'
         );
     });
 
@@ -40,7 +40,7 @@ describe('capitalize', () => {
 
     test('multiword string lowercases non-first words', () => {
         expect(template.parse('{{ title | capitalize }}', { title: 'the QUICK brown FOX' })).toBe(
-            'The quick brown fox',
+            'The quick brown fox'
         );
     });
 

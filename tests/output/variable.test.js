@@ -8,7 +8,7 @@ describe('variable output {{ }}', () => {
 
     test('escapes HTML by default', () => {
         expect(template.parse('{{ html }}', { html: '<b>bold</b>' })).toBe(
-            '&lt;b&gt;bold&lt;/b&gt;',
+            '&lt;b&gt;bold&lt;/b&gt;'
         );
     });
 

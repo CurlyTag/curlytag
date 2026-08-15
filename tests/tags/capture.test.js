@@ -7,8 +7,8 @@ describe('capture', () => {
     });
 
     test('captured variable is available after the block', () => {
-        const tpl =
-            '{% capture greeting %}Hi {% capture name %}World{% endcapture %}{% endcapture %}{{ greeting }}{{ name }}';
+        const tpl
+            = '{% capture greeting %}Hi {% capture name %}World{% endcapture %}{% endcapture %}{{ greeting }}{{ name }}';
         expect(template.parse(tpl)).toBe('Hi World');
     });
 });

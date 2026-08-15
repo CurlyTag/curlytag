@@ -36,5 +36,5 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - run: vp exec playwright install chromium --with-deps
+      - run: vp exec playwright install chromium firefox webkit --with-deps
       - run: vp test --project browser

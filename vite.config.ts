@@ -32,7 +32,8 @@ export default defineConfig({
             {
                 resolve: {
                     alias: {
-                        '#curlytag': new URL('./tests/helpers/curlytag.js', import.meta.url).pathname,
+                        '#curlytag': new URL('./tests/helpers/curlytag.js', import.meta.url)
+                            .pathname,
                         '#fixtures': new URL('./tests/fixtures', import.meta.url).pathname,
                     },
                 },
@@ -43,7 +44,11 @@ export default defineConfig({
                         enabled: true,
                         headless: true,
                         provider: playwright(),
-                        instances: [{ browser: 'chromium' }],
+                        instances: [
+                            { browser: 'chromium' },
+                            { browser: 'firefox' },
+                            { browser: 'webkit' },
+                        ],
                     },
                 },
             },

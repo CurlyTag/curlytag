@@ -97,10 +97,10 @@ After the container starts, you're ready to work.
     vp install
     ```
 
-3. Install Chromium for the browser test suite:
+3. Install the browsers for the test suite:
 
     ```bash
-    vp exec playwright install chromium
+    vp exec playwright install chromium firefox webkit
     ```
 
 4. Set up commit hooks:
@@ -115,7 +115,7 @@ After the container starts, you're ready to work.
 vp run check                     # Format, lint, and validate JavaScript style
 vp run fmt                       # Format with Oxfmt and ESLint Stylistic
 vp run lint                      # Lint with Oxlint
-vp test --project browser        # Run Chromium tests once
+vp test --project browser        # Run Chromium, Firefox, and WebKit tests once
 ```
 
 ### Test Layout

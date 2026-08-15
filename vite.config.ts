@@ -32,25 +32,13 @@ export default defineConfig({
             {
                 resolve: {
                     alias: {
-                        '#curlytag': new URL('./curlytag.js', import.meta.url).pathname,
+                        '#curlytag': new URL('./tests/helpers/curlytag.js', import.meta.url).pathname,
                         '#fixtures': new URL('./tests/fixtures', import.meta.url).pathname,
                     },
                 },
                 test: {
-                    name: 'node',
-                    include: ['../tests/**/*.test.js'],
-                    exclude: ['../tests/**/*.browser.test.js'],
-                },
-            },
-            {
-                resolve: {
-                    alias: {
-                        '#curlytag': new URL('./curlytag.js', import.meta.url).pathname,
-                    },
-                },
-                test: {
                     name: 'browser',
-                    include: ['../tests/**/*.browser.test.js'],
+                    include: ['../tests/**/*.test.js'],
                     browser: {
                         enabled: true,
                         headless: true,

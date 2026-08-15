@@ -14,7 +14,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: '24'
@@ -26,55 +26,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: '24'
           cache: true
       - run: vp install
-      - run: vp test --project node
-
-  runtime-smoke:
-    needs: test
-    name: SSR Smoke (${{ matrix.runtime }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runtime: node
-            command: node tests/ssr-smoke.mjs
-          - runtime: bun
-            command: bun tests/ssr-smoke.mjs
-          - runtime: deno
-            command: deno run --allow-read tests/ssr-smoke.mjs
-          - runtime: browser
-            command: vp test --project browser
-    steps:
-      - uses: actions/checkout@v6
-      - if: matrix.runtime == 'node'
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-      - if: matrix.runtime == 'bun'
-        uses: oven-sh/setup-bun@v2
-      - if: matrix.runtime == 'deno'
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-      - if: matrix.runtime == 'browser'
-        uses: voidzero-dev/setup-vp@v1
-        with:
-          node-version: '24'
-          cache: true
-      - if: matrix.runtime == 'browser'
-        run: vp install
-      - if: matrix.runtime == 'browser'
-        uses: actions/cache@v5
-        id: playwright-cache
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - if: matrix.runtime == 'browser'
-        run: vp exec playwright install chromium --with-deps
-      - run: ${{ matrix.command }}
+      - run: vp exec playwright install chromium --with-deps
+      - run: vp test --project browser

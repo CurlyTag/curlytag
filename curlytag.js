@@ -368,7 +368,7 @@ export class CurlyTag {
                 return copy;
             },
             slice: (value, start, end) => {
-                if (typeof value !== 'string' && typeof value !== 'array') return;
+                if (typeof value !== 'string' && !Array.isArray(value)) return;
 
                 return end !== undefined ? value.slice(start, end) : value.slice(start);
             },
@@ -719,17 +719,17 @@ export class CurlyTag {
     evaluate(expression, ctx) {
         if (!expression) return undefined;
 
-        expression = expression.replaceAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'(\snot\s)|(\sand\s)|(\sor\s)b/g, (match, not, and, or) => {
+        expression = expression.replaceAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(not)\s+|\b(and)\b|\b(or)\b/g, (match, not, and, or) => {
             if (not) {
-                return ' !';
+                return '!';
             }
 
             if (and) {
-                return ' && ';
+                return '&&';
             }
 
             if (or) {
-                return ' || ';
+                return '||';
             }
 
             return match;
@@ -761,6 +761,10 @@ export class CurlyTag {
                 return value;
                 break;
             case 'object':
+                if (value === null) {
+                    return false;
+                }
+
                 if (Array.isArray(value)) {
                     return value.length > 0;
                 }

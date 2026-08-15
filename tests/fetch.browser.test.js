@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vite-plus/test';
-import { template } from '#curlytag';
+import { curlytag } from '#curlytag';
 
 describe('CurlyTag - browser fetch()', () => {
     beforeEach(() => {
-        template.directory = '/templates/';
-        template.cache.clear();
+        curlytag.directory = '/templates/';
+        curlytag.cache.clear();
     });
 
     afterEach(() => {
-        template.directory = '';
+        curlytag.directory = '';
         vi.restoreAllMocks();
     });
 
@@ -17,7 +17,7 @@ describe('CurlyTag - browser fetch()', () => {
             new Response('Hello {{ name }}!', { status: 200 })
         );
 
-        const result = await template.render('greeting', { name: 'World' });
+        const result = await curlytag.render('greeting', { name: 'World' });
 
         expect(result).toBe('Hello World!');
         expect(fetch).toHaveBeenCalledWith('/templates/greeting.html');
@@ -28,7 +28,7 @@ describe('CurlyTag - browser fetch()', () => {
             new Response('Not Found', { status: 404 })
         );
 
-        const result = await template.render('missing', {});
+        const result = await curlytag.render('missing', {});
 
         expect(result).toBe('');
     });
@@ -38,8 +38,8 @@ describe('CurlyTag - browser fetch()', () => {
             new Response('Cached: {{ value }}', { status: 200 })
         );
 
-        await template.render('cached', { value: 'one' });
-        await template.render('cached', { value: 'two' });
+        await curlytag.render('cached', { value: 'one' });
+        await curlytag.render('cached', { value: 'two' });
 
         expect(fetch).toHaveBeenCalledTimes(1);
     });

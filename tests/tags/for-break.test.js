@@ -51,6 +51,17 @@ describe('for', () => {
             expect(data.loop).toBeUndefined();
         });
 
+        test('removes loop variables after a conditional break', () => {
+            const data = { items: [ 'A', 'B' ] };
+            const tpl
+                = '{% for item in items %}{% if item == "B" %}{% break %}{% endif %}{% endfor %}';
+
+            curlytag.parse(tpl, data);
+
+            expect(data.item).toBeUndefined();
+            expect(data.loop).toBeUndefined();
+        });
+
         test('only exits the inner loop', () => {
             const tpl
                 = '{% for i in outer %}{% for j in inner %}{% if j == 2 %}{% break %}{% endif %}{{ i }}.{{ j }} {% endfor %}{% endfor %}';

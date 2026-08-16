@@ -1241,6 +1241,9 @@ export class CurlyTag {
         // Loop finished → cleanup
         stack.pop();
 
+        delete ctx[top.name];
+        delete ctx.loop;
+
         return top.end + 1;
     }
 

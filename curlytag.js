@@ -137,7 +137,9 @@ export class CurlyTag {
                     '&#34;': '"'
                 };
 
-                return String.prototype.replace.call(value, unescaped, (matched) => {
+                let regex = new RegExp(Object.keys(unescaped).join('|'), 'g');
+
+                return String(value ?? '').replace(regex, (matched) => {
                     return unescaped[matched];
                 });
             },

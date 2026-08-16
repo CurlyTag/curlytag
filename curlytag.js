@@ -671,19 +671,36 @@ export class CurlyTag {
 
                 // Handle Close Tags
                 let top = stack[stack.length - 1];
+                let forRef;
 
                 if (top && this.openclose[top.type].includes(command)) {
                     token[top.index].end = token.length;
 
-                    stack.pop();
+                    let popped = stack.pop();
+
+                    if (command === 'else' && popped.type === 'for') {
+                        forRef = popped.index;
+                    } else if (
+                        command === 'endfor'
+                        && popped.type === 'else'
+                        && popped.forRef !== undefined
+                    ) {
+                        token[popped.forRef].loopEnd = token.length;
+                    }
                 }
 
                 // Handle Open Tags
                 if (command in this.openclose) {
-                    stack.push({
+                    let entry = {
                         type: command,
                         index: token.length
-                    });
+                    };
+
+                    if (forRef !== undefined) {
+                        entry.forRef = forRef;
+                    }
+
+                    stack.push(entry);
                 }
 
                 token.push({
@@ -1223,6 +1240,9 @@ export class CurlyTag {
 
         // Loop finished → cleanup
         stack.pop();
+
+        delete ctx[top.name];
+        delete ctx.loop;
 
         return top.end + 1;
     }

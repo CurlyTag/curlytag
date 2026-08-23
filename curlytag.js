@@ -157,10 +157,24 @@ export class CurlyTag {
                 return value.replace(/<\s*script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<\s*style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '').trim();
             },
             // String
-            regex: (value, test) => {
-                var args = arguments, string = args[0], i = 1;
+            sprintf: (value, ...args) => {
+                let index = 0;
 
-                return string.replace(/%(%|s|d)/g, test);
+                return String(value ?? '').replace(/%[%sd]/g, (matched) => {
+                    if (matched === '%%') {
+                        return '%';
+                    }
+
+                    let replacement = args[index++];
+
+                    if (matched === '%d') {
+                        let number = Number.parseInt(replacement, 10);
+
+                        return Number.isNaN(number) ? '' : String(number);
+                    }
+
+                    return String(replacement ?? '');
+                });
             },
             capitalize: (value) => {
                 let chars = [ ...String(value ?? '') ];

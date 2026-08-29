@@ -40,7 +40,7 @@ export class CurlyTag {
             raw: this.handleRaw.bind(this),
             endraw: this.handleEndraw.bind(this),
             comment: this.handleComment.bind(this),
-            endcomment: this.handleEndcomment.bind(this)
+            endcomment: this.handleEndcomment.bind(this),
         };
 
         this.openclose = {
@@ -84,7 +84,7 @@ export class CurlyTag {
             unless: [
                 'else',
                 'endunless'
-            ]
+            ],
         };
 
         this.operator = {
@@ -137,9 +137,7 @@ export class CurlyTag {
                     '&#34;': '"'
                 };
 
-                let regex = new RegExp(Object.keys(unescaped).join('|'), 'g');
-
-                return String(value ?? '').replace(regex, (matched) => {
+                return String.prototype.replace.call(value, unescaped, (matched) => {
                     return unescaped[matched];
                 });
             },
@@ -157,27 +155,14 @@ export class CurlyTag {
                 return value.replace(/<\s*script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<\s*style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '').trim();
             },
             // String
-            sprintf: (value, ...args) => {
-                let index = 0;
+            regex: (value, test) => {
+                var args = arguments, string = args[0], i = 1;
 
-                return String(value ?? '').replace(/%[%sd]/g, (matched) => {
-                    if (matched === '%%') {
-                        return '%';
-                    }
+                return string.replace(/%(%|s|d)/g, test);
 
-                    let replacement = args[index++];
-
-                    if (matched === '%d') {
-                        let number = Number.parseInt(replacement, 10);
-
-                        return Number.isNaN(number) ? '' : String(number);
-                    }
-
-                    return String(replacement ?? '');
-                });
             },
             capitalize: (value) => {
-                let chars = [ ...String(value ?? '') ];
+                let chars = [...String(value ?? '')];
 
                 if (!chars.length) {
                     return '';
@@ -332,7 +317,7 @@ export class CurlyTag {
             sort: (value, key = null, direction = 'asc') => {
                 const dir = direction === 'desc' ? -1 : 1;
 
-                return [ ...value ].sort((a, b) => {
+                return [...value].sort((a, b) => {
                     let va = key ? a?.[key] : a;
                     let vb = key ? b?.[key] : b;
 
@@ -384,7 +369,7 @@ export class CurlyTag {
                 return copy;
             },
             slice: (value, start, end) => {
-                if (typeof value !== 'string' && !Array.isArray(value)) return;
+                if (typeof value !== 'string' && typeof value !== 'array') return;
 
                 return end !== undefined ? value.slice(start, end) : value.slice(start);
             },
@@ -412,7 +397,7 @@ export class CurlyTag {
             },
             reverse: (value) => {
                 if (Array.isArray(value)) {
-                    return [ ...value ].reverse();
+                    return [...value].reverse();
                 }
 
                 if (typeof value === 'string') {
@@ -442,7 +427,7 @@ export class CurlyTag {
                 return value.filter((item) => item != null);
             },
             uniq: (value) => {
-                return [ ...new Set(value) ];
+                return [...new Set(value)];
             },
             map: (value, property) => {
                 return value.map((item) => item?.[property]);
@@ -496,8 +481,8 @@ export class CurlyTag {
                 return decodeURIComponent(value);
             },
             base64_encode: (value) => {
-                const bytes = new TextEncoder().encode(String(value ?? ''));
-                const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('');
+                let bytes = new TextEncoder().encode(String(value ?? ''));
+                let binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('');
 
                 return btoa(binary);
             },
@@ -510,7 +495,7 @@ export class CurlyTag {
                 } catch {
                     return '';
                 }
-            }
+            },
         };
     }
 
@@ -637,14 +622,6 @@ export class CurlyTag {
             index++;
         }
 
-        // Flush any pending output left on the stack when a tag that produces
-        // output (echo, endfilter, include) is the very last token in the template.
-        let pending = stack[stack.length - 1];
-
-        if (pending?.type === 'output' && pending.output != null) {
-            output += pending.output;
-        }
-
         return output;
     }
 
@@ -658,7 +635,7 @@ export class CurlyTag {
         let regex = /\{\{-?\s([\s\S]*?)\s-?\}\}|\{%-?\s([\s\S]*?)\s-?%}|\{#\s([\s\S]*?)\s#\}/g;
 
         while ((match = regex.exec(template)) !== null) {
-            let [ raw, output, tag, comment ] = match;
+            let [raw, output, tag, comment] = match;
 
             let line = template.substring(0, match.index).split(/\r\n|\r|\n/).length;
 
@@ -675,9 +652,7 @@ export class CurlyTag {
                 token.push({
                     type: 'output',
                     value: output,
-                    raw: raw,
-                    line: line,
-                    column: index
+                    raw: raw
                 });
             }
 
@@ -687,45 +662,26 @@ export class CurlyTag {
 
                 // Handle Close Tags
                 let top = stack[stack.length - 1];
-                let forRef;
 
                 if (top && this.openclose[top.type].includes(command)) {
                     token[top.index].end = token.length;
 
-                    let popped = stack.pop();
-
-                    if (command === 'else' && popped.type === 'for') {
-                        forRef = popped.index;
-                    } else if (
-                        command === 'endfor'
-                        && popped.type === 'else'
-                        && popped.forRef !== undefined
-                    ) {
-                        token[popped.forRef].loopEnd = token.length;
-                    }
+                    stack.pop();
                 }
 
                 // Handle Open Tags
                 if (command in this.openclose) {
-                    let entry = {
+                    stack.push({
                         type: command,
                         index: token.length
-                    };
-
-                    if (forRef !== undefined) {
-                        entry.forRef = forRef;
-                    }
-
-                    stack.push(entry);
+                    });
                 }
 
                 token.push({
                     type: 'tag',
                     tag: command,
                     value: tag,
-                    raw: raw,
-                    line: line,
-                    column: index
+                    raw: raw
                 });
             }
 
@@ -752,17 +708,17 @@ export class CurlyTag {
     evaluate(expression, ctx) {
         if (!expression) return undefined;
 
-        expression = expression.replaceAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(not)\s+|\b(and)\b|\b(or)\b/g, (match, not, and, or) => {
+        expression = expression.replaceAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'(\snot\s)|(\sand\s)|(\sor\s)b/g, (match, not, and, or) => {
             if (not) {
-                return '!';
+                return ' !';
             }
 
             if (and) {
-                return '&&';
+                return ' && ';
             }
 
             if (or) {
-                return '||';
+                return ' || ';
             }
 
             return match;
@@ -773,7 +729,7 @@ export class CurlyTag {
 
             return func({ ...ctx });
         } catch (error) {
-            console.log(`[Template] Warning: Evaluate error '${error}'`);
+            console.log(`[Template] Warning: Evaluate error '${expression}'`);
 
             return undefined;
         }
@@ -794,10 +750,6 @@ export class CurlyTag {
                 return value;
                 break;
             case 'object':
-                if (value === null) {
-                    return false;
-                }
-
                 if (Array.isArray(value)) {
                     return value.length > 0;
                 }
@@ -817,14 +769,14 @@ export class CurlyTag {
 
         let result = value;
 
-        let filters = expression.indexOf('|') !== -1 ? expression.split('|').map((value) => value.trim()) : [ expression ];
+        let filters = expression.indexOf('|') !== -1 ? expression.split('|').map((value) => value.trim()) : [expression];
 
         for (let filter of filters) {
             let match = filter.match(/^([^:]*):?\s?(.+)?$/);
 
             if (!match) return;
 
-            let [ , name, argument ] = match;
+            let [, name, argument] = match;
 
             let args = [];
 
@@ -862,10 +814,10 @@ export class CurlyTag {
         let match = token.value.match(/([^|]+?)\s*(?:\s*\|\s*(.+))?$/);
 
         if (!match) {
-            console.log(`[Template] Invalid output line ${token.line} column ${token.column}`);
+            console.log(`[Template] Invalid output ${token.raw}`);
         }
 
-        let [ , name, filter ] = match;
+        let [, name, filter] = match;
 
         let value = this.evaluate(name, ctx);
 
@@ -889,7 +841,7 @@ export class CurlyTag {
     }
 
     /**
-     * Handle set statement
+     * Handle assign statement
      *
      * set var = expression | filter1 | filter2
      */
@@ -897,12 +849,12 @@ export class CurlyTag {
         let match = token.value.match(/^assign\s(\w+)\s=\s([^|]+?)\s*(?:\s*\|\s*(.+))?$/);
 
         if (!match) {
-            console.log(`[Template] Invalid 'assign' syntax line ${token.line} column ${token.column}`);
+            console.log(`[Template] Invalid 'assign' syntax ${token.raw}`);
 
             return;
         }
 
-        let [ , name, expression, filter ] = match;
+        let [, name, expression, filter] = match;
 
         let value = this.evaluate(expression, ctx);
 
@@ -919,7 +871,7 @@ export class CurlyTag {
         let match = token.value.match(/^include\s(.+)$/);
 
         if (!match) {
-            console.warn(`[Template] Invalid 'include' syntax line ${token.line} column ${token.column}`);
+            console.warn(`[Template] Invalid 'include' syntax ${token.raw}`);
 
             return;
         }
@@ -936,12 +888,12 @@ export class CurlyTag {
         let match = token.value.match(/^echo\s([^|]+?)\s*(?:\s*\|\s*(.+))?$/);
 
         if (!match) {
-            console.log(`[Template] Invalid echo line ${token.line} column ${token.column}`);
+            console.log(`[Template] Invalid 'echo' syntax ${token.raw}`);
 
             return;
         }
 
-        let [ , name, filter ] = match;
+        let [, name, filter] = match;
 
         let value = this.evaluate(name, ctx);
 
@@ -952,7 +904,421 @@ export class CurlyTag {
 
         stack.push({
             type: 'output',
-            output: value
+            output: value,
+        });
+    }
+
+    /**
+     * Handle If statement
+     *
+     * If var = expression | filter1 | filter2
+     */
+    handleIf(token, stack, ctx, index) {
+        let match = token.value.match(/^if\s(.+)$/);
+
+        if (!match) {
+            console.log(`[Template] Invalid 'if' syntax ${token.raw}`);
+
+            stack.push({
+                type: 'if',
+                active: true
+            });
+
+            return token.end;
+        }
+
+        // Check to see if a previous tag is inactive.
+        let active = this.evaluate(match[1], ctx);
+
+        // Convert the output into bool.
+        active = this.truthy(active);
+
+        stack.push({
+            type: 'if',
+            active: active,
+        });
+
+        if (!active) return token.end;
+    }
+
+    /**
+     * Handle If statement
+     *
+     * End If var == expression
+     */
+    handleEndif(token, stack, ctx, index) {
+        let top = stack[stack.length - 1];
+
+        if (!top || top.type !== 'if') {
+            console.log(`[Template] Unexpected 'if' tag ${token.raw}`);
+
+            return;
+        }
+
+        stack.pop();
+    }
+
+    handleElseif(token, stack, ctx, index) {
+        let match = token.value.match(/^elseif\s(.+)$/);
+
+        if (!match) {
+            console.log(`[Template] Invalid 'elseif' syntax ${token.raw}`);
+
+            return;
+        }
+
+        let top = stack[stack.length - 1];
+
+        if (!top || top.type !== 'if') {
+            console.log(`[Template] Unexpected 'elseif' tag ${token.raw}`);
+
+            return;
+        }
+
+        if (top.active) return token.end;
+
+        // If any previous not active tags then set current tag to false;
+        let active = this.evaluate(match[1], ctx);
+
+        // Convert the output into bool
+        top.active = this.truthy(active);
+
+        if (!top.active) {
+            return token.end;
+        }
+    }
+
+    handleElse(token, stack, ctx, index) {
+        let top = stack[stack.length - 1];
+
+        if (!top || (top.type !== 'if' && top.type !== 'unless' && top.type !== 'case' && top.type !== 'for')) {
+            console.log(`[Template] Unexpected 'else' tag ${token.raw}`);
+
+            return;
+        }
+
+        // If any previous not active tags then set current tag to false;
+        if (top.active) return token.end;
+
+        top.active = true;
+    }
+
+    /**
+     * Handle Unless statement
+     *
+     * End If var = expression | filter1 | filter2
+     */
+    handleUnless(token, stack, ctx, index) {
+        let match = token.value.match(/^unless\s(.+)$/);
+
+        if (!match) {
+            console.log(`[Template] Invalid 'unless' syntax ${token.raw}`);
+
+            return;
+        }
+
+        // Check to see if a previous tag is inactive
+        let active = this.evaluate(match[1], ctx);
+
+        // Convert the output into bool
+        active = !this.truthy(active);
+
+        stack.push({
+            type: 'unless',
+            active: active,
+        });
+
+        if (!active) return token.end;
+    }
+
+    handleEndunless(token, stack, ctx, index) {
+        let top = stack[stack.length - 1];
+
+        if (!top || top.type !== 'unless') {
+            console.log(`[Template] Unexpected 'endunless' tag ${token.raw}`);
+
+            return;
+        }
+
+        stack.pop();
+    }
+
+    handleFor(token, stack, ctx, index) {
+        let match = token.value.match(/^for\s(.*)\sin\s([^|]+?)\s*(?:\s*\|\s*(.+))?$/);
+
+        if (!match) {
+            console.log(`[Template] Invalid 'for' syntax ${token.raw}`);
+
+            return;
+        }
+
+        let [, name, key, filter] = match;
+
+        // Match any global function
+        let items = this.evaluate(key, ctx);
+
+        if (items === null || typeof items !== 'object') {
+            items = [];
+        }
+
+        // Apply Filters
+        if (filter !== undefined) {
+            items = this.parseFilter(items, filter, ctx);
+        }
+
+        stack.push({
+            type: 'for',
+            name: name,
+            items: items,
+            index: -1,
+            start: index + 1,
+            end: token.end,
+            active: items.length > 0,
+            parent: { ...ctx },
+        });
+
+        return token.end;
+    }
+
+    handleEndfor(token, stack, ctx, index) {
+        // If skip we don't want to run evaluate method.
+        let top = stack[stack.length - 1];
+
+        if (top == undefined || top.type !== 'for') {
+            console.log(`[Template] Unexpected 'endfor' tag ${token.raw}`);
+
+            return;
+        }
+
+        top.index++;
+
+        if (top.index < top.items.length) {
+            // Restore parent context (prevents leakage)
+            Object.assign(ctx, top.parent);
+
+            let pos = top.name.indexOf(',');
+
+            if (pos === false) {
+                ctx[top.name] = top.items[top.index]; // ← top.name (not top.name)
+            } else {
+                this.evaluate(ctx, ctx);
+
+                //let keys = top.name.split(',');
+
+                //for (let key of keys) {
+
+                //}
+            }
+
+
+
+            ctx.loop = {
+                index: top.index + 1,
+                index0: top.index,
+                first: top.index === 0,
+                last: top.index === top.items.length - 1,
+                length: top.items.length,
+                rindex: top.items.length - top.index,
+                rindex0: top.items.length - top.index - 1,
+            };
+
+            return top.start;
+        }
+
+        // Loop finished → cleanup
+        stack.pop();
+
+        delete ctx[top.name];
+        delete ctx.loop;
+    }
+
+    handleContinue(token, stack, ctx, index) {
+        // Ignore continue when not inside a loop to avoid corrupting the if/else stack.
+        if (!stack.some((frame) => frame.type === 'for')) {
+            return;
+        }
+
+        for (let i = stack.length - 1; i >= 0; i--) {
+            if (stack[i].type == 'for') {
+                return stack[i].end;
+            }
+
+            // Remove all tags before endfor loop.
+            stack.pop();
+        }
+    }
+
+    handleBreak(token, stack, ctx, index) {
+        // Ignore break when not inside a loop to avoid corrupting the if/else stack.
+        if (!stack.some((frame) => frame.type === 'for')) {
+            return;
+        }
+
+        let top = {};
+
+        for (let i = stack.length - 1; i >= 0; i--) {
+            top = stack[i];
+
+            if (top.type == 'for') break;
+
+            // Remove all tags before endfor loop.
+            stack.pop();
+        }
+
+        // Loop finished → cleanup
+        stack.pop();
+
+        return top.end + 1;
+    }
+
+    handleCase(token, stack, ctx, index) {
+        let match = token.value.match(/^case\s([\w.]+)$/);
+
+        if (!match) {
+            console.log(`[Template] Invalid 'case' syntax ${token.raw}`);
+
+            return;
+        }
+
+        stack.push({
+            type: 'case',
+            value: match[1],
+            active: false,
+        });
+    }
+
+    handleWhen(token, stack, ctx, index) {
+        let match = token.value.match(/^when\s(.+)$/);
+
+        if (!match) {
+            console.log(`[Template] Invalid 'when' syntax ${token.raw}`);
+
+            return;
+        }
+
+        let top = stack[stack.length - 1];
+
+        if (!top || top.type !== 'case') {
+            console.log(`[Template] Unexpected 'when' tag ${token.raw}`);
+
+            return;
+        }
+
+        // Split if more than one item to compare
+        if (!this.evaluate(`[${match[1]}].includes(${top.value})`, ctx)) return token.end;
+
+        top.active = true;
+    }
+
+    handleEndcase(token, stack, ctx, index) {
+        let top = stack[stack.length - 1];
+
+        if (!top || top.type !== 'case') {
+            console.log(`[Template] Unexpected 'case' tag ${token.raw}`);
+
+            return;
+        }
+
+        stack.pop();
+    }
+
+    handleCapture(token, stack, ctx, index) {
+        let match = token.value.match(/^capture\s(.+)$/);
+
+        if (!match) {
+            console.warn(`[Template] Invalid 'capture' syntax ${token.raw}`);
+
+            return;
+        }
+
+        stack.push({
+            type: 'capture',
+            name: match[1],
+            value: '',
+        });
+    }
+
+    handleEndcapture(token, stack, ctx, index) {
+        let top = stack[stack.length - 1];
+
+        if (!top || top.type !== 'capture') {
+            console.log(`[Template] Unexpected 'endcapture' tag line ${token.raw}`);
+
+            return;
+        }
+
+        ctx[top.name] = top.value;
+
+        stack.pop();
+    }
+
+    handleRaw(token, stack, ctx, index) {
+        stack.push({
+            type: 'raw',
+            end: token.end,
+        });
+    }
+
+    handleEndraw(token, stack, ctx, index) {
+        let top = stack[stack.length - 1];
+
+        if (!top || top.type !== 'raw') {
+            console.log(`[Template] Unexpected 'raw' tag ${token.raw}`);
+
+            return;
+        }
+
+        stack.pop();
+    }
+
+    handleComment(token, stack, ctx, index) {
+        stack.push({ type: 'comment' });
+
+        return token.end;
+    }
+
+    handleEndcomment(token, stack, ctx, index) {
+        let top = stack[stack.length - 1];
+
+        if (!top || top.type !== 'comment') {
+            console.log(`[Template] Unexpected 'comment' tag ${token.raw}`);
+
+            return;
+        }
+
+        stack.pop();
+    }
+
+    handleFilter(token, stack, ctx, index) {
+        let match = token.value.match(/^filter\s(\w+)$/);
+
+        if (!match) {
+            console.log(`[Template] Invalid 'filter' syntax ${token.raw}`);
+
+            return;
+        }
+
+        stack.push({
+            type: 'capture',
+            filter: match[1],
+            value: '',
+        });
+    }
+
+    handleEndfilter(token, stack, ctx, index) {
+        let top = stack[stack.length - 1];
+
+        if (!top || top.type !== 'capture') {
+            console.log(`[Template] Unexpected 'endfilter' tag ${token.raw}`);
+
+            return;
+        }
+
+        stack.pop();
+
+        stack.push({
+            type: 'output',
+            output: this.parseFilter(top.value, top.filter, ctx),
         });
     }
 
@@ -960,7 +1326,7 @@ export class CurlyTag {
         let match = token.value.match(/^cycle\s(.*)/);
 
         if (!match) {
-            console.warn(`[Template] Invalid 'cycle' syntax line ${token.line} column ${token.column}`);
+            console.warn(`[Template] Invalid 'cycle' syntax ${token.raw}`);
 
             return;
         }
@@ -1003,414 +1369,7 @@ export class CurlyTag {
 
         stack.push({
             type: 'output',
-            output: values[state.index]
-        });
-    }
-
-    /**
-     * Handle If statement
-     *
-     * If var = expression | filter1 | filter2
-     */
-    handleIf(token, stack, ctx, index) {
-        let match = token.value.match(/^if\s(.+)$/);
-
-        if (!match) {
-            console.log(`[Template] Invalid 'if' syntax line ${token.line} column ${token.column}`);
-
-            stack.push({
-                type: 'if',
-                active: true
-            });
-
-            return token.end;
-        }
-
-        // Check to see if a previous tag is inactive
-        let active = this.evaluate(match[1], ctx);
-
-        // Convert the output into bool
-        active = this.truthy(active);
-
-        stack.push({
-            type: 'if',
-            active: active
-        });
-
-        if (!active) return token.end;
-    }
-
-    /**
-     * Handle If statement
-     *
-     * End If var == expression
-     */
-    handleEndif(token, stack, ctx, index) {
-        let top = stack[stack.length - 1];
-
-        if (!top || top.type !== 'if') {
-            console.log(`[Template] Unexpected 'if' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        stack.pop();
-    }
-
-    /**
-     * Handle Unless statement
-     *
-     * End If var = expression | filter1 | filter2
-     */
-    handleUnless(token, stack, ctx, index) {
-        let match = token.value.match(/^unless\s(.+)$/);
-
-        if (!match) {
-            console.log(`[Template] Invalid 'unless' syntax line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        // Check to see if a previous tag is inactive
-        let active = this.evaluate(match[1], ctx);
-
-        // Convert the output into bool
-        active = !this.truthy(active);
-
-        stack.push({
-            type: 'unless',
-            active: active
-        });
-
-        if (!active) return token.end;
-    }
-
-    handleEndunless(token, stack, ctx, index) {
-        let top = stack[stack.length - 1];
-
-        if (!top || top.type !== 'unless') {
-            console.log(`[Template] Unexpected 'endunless' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        stack.pop();
-    }
-
-    handleElseif(token, stack, ctx, index) {
-        let match = token.value.match(/^elseif\s(.+)$/);
-
-        if (!match) {
-            console.log(`[Template] Invalid 'elseif' syntax line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        let top = stack[stack.length - 1];
-
-        if (!top || top.type !== 'if') {
-            console.log(`[Template] Unexpected 'elseif' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        if (top.active) return token.end;
-
-        // If any previous not active tags then set current tag to false;
-        let active = this.evaluate(match[1], ctx);
-
-        // Convert the output into bool
-        top.active = this.truthy(active);
-
-        if (!top.active) {
-            return token.end;
-        }
-    }
-
-    handleElse(token, stack, ctx, index) {
-        let top = stack[stack.length - 1];
-
-        if (!top || (top.type !== 'if' && top.type !== 'unless' && top.type !== 'case' && top.type !== 'for')) {
-            console.log(`[Template] Unexpected 'else' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        // If any previous not active tags then set current tag to false;
-        if (top.active) return token.end;
-
-        top.active = true;
-    }
-
-    handleFor(token, stack, ctx, index) {
-        let match = token.value.match(/^for\s(.*)\sin\s([^|]+?)\s*(?:\s*\|\s*(.+))?$/);
-
-        if (!match) {
-            console.log(`[Template] Invalid 'for' syntax line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        let [ , name, key, filter ] = match;
-
-        // Match any global function
-        let items = this.evaluate(key, ctx);
-
-        if (items === null || typeof items !== 'object') {
-            items = [];
-        }
-
-        // Apply Filters
-        if (filter !== undefined) {
-            items = this.parseFilter(items, filter, ctx);
-        }
-
-        let endIndex = token.loopEnd ?? token.end;
-
-        stack.push({
-            type: 'for',
-            name: name,
-            items: items,
-            index: -1,
-            start: index + 1,
-            end: endIndex,
-            active: items.length > 0,
-            parent: { ...ctx }
-        });
-
-        return items.length > 0 ? endIndex : token.end;
-    }
-
-    handleEndfor(token, stack, ctx, index) {
-        // If skip we don't want to run evaluate method.
-        let top = stack[stack.length - 1];
-
-        if (top == undefined || top.type !== 'for') {
-            console.log(`[Template] Unexpected 'endfor' line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        top.index++;
-
-        if (top.index < top.items.length) {
-            // Restore parent context (prevents leakage)
-            Object.assign(ctx, top.parent);
-
-            ctx[top.name] = top.items[top.index]; // ← top.name (not top.name)
-
-            ctx.loop = {
-                index: top.index + 1,
-                index0: top.index,
-                first: top.index === 0,
-                last: top.index === top.items.length - 1,
-                length: top.items.length,
-                rindex: top.items.length - top.index,
-                rindex0: top.items.length - top.index - 1
-            };
-
-            return top.start;
-        }
-
-        // Loop finished → cleanup
-        stack.pop();
-
-        delete ctx[top.name];
-        delete ctx.loop;
-    }
-
-    handleContinue(token, stack, ctx, index) {
-        // Ignore continue when not inside a loop to avoid corrupting the if/else stack.
-        if (!stack.some((frame) => frame.type === 'for')) {
-            return;
-        }
-
-        for (let i = stack.length - 1; i >= 0; i--) {
-            if (stack[i].type == 'for') {
-                return stack[i].end;
-            }
-
-            // Remove all tags before endfor loop.
-            stack.pop();
-        }
-    }
-
-    handleBreak(token, stack, ctx, index) {
-        // Ignore break when not inside a loop to avoid corrupting the if/else stack.
-        if (!stack.some((frame) => frame.type === 'for')) {
-            return;
-        }
-
-        let top = {};
-
-        for (let i = stack.length - 1; i >= 0; i--) {
-            top = stack[i];
-
-            if (top.type == 'for') {
-                break;
-            }
-
-            // Remove all tags before endfor loop.
-            stack.pop();
-        }
-
-        // Loop finished → cleanup
-        stack.pop();
-
-        delete ctx[top.name];
-        delete ctx.loop;
-
-        return top.end + 1;
-    }
-
-    handleCase(token, stack, ctx, index) {
-        let match = token.value.match(/^case\s([\w.]+)$/);
-
-        if (!match) {
-            console.log(`[Template] Invalid 'case' syntax line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        stack.push({
-            type: 'case',
-            value: match[1],
-            active: false
-        });
-    }
-
-    handleWhen(token, stack, ctx, index) {
-        let match = token.value.match(/^when\s(.+)$/);
-
-        if (!match) {
-            console.log(`[Template] Invalid 'when' syntax line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        let top = stack[stack.length - 1];
-
-        if (!top || top.type !== 'case') {
-            console.log(`[Template] Unexpected 'when' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        // Split if more than one item to compare
-        if (!this.evaluate(`[${match[1]}].includes(${top.value})`, ctx)) return token.end;
-
-        top.active = true;
-    }
-
-    handleEndcase(token, stack, ctx, index) {
-        let top = stack[stack.length - 1];
-
-        if (!top || top.type !== 'case') {
-            console.log(`[Template] Unexpected 'case' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        stack.pop();
-    }
-
-    handleCapture(token, stack, ctx, index) {
-        let match = token.value.match(/^capture\s(.+)$/);
-
-        if (!match) {
-            console.warn(`[Template] Invalid 'capture' syntax line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        stack.push({
-            type: 'capture',
-            name: match[1],
-            value: ''
-        });
-    }
-
-    handleEndcapture(token, stack, ctx, index) {
-        let top = stack[stack.length - 1];
-
-        if (!top || top.type !== 'capture') {
-            console.log(`[Template] Unexpected 'endcapture' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        ctx[top.name] = top.value;
-
-        stack.pop();
-    }
-
-    handleRaw(token, stack, ctx, index) {
-        stack.push({
-            type: 'raw',
-            end: token.end
-        });
-    }
-
-    handleEndraw(token, stack, ctx, index) {
-        let top = stack[stack.length - 1];
-
-        if (!top || top.type !== 'raw') {
-            console.log(`[Template] Unexpected 'raw' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        stack.pop();
-    }
-
-    handleComment(token, stack, ctx, index) {
-        stack.push({ type: 'comment' });
-
-        return token.end;
-    }
-
-    handleEndcomment(token, stack, ctx, index) {
-        let top = stack[stack.length - 1];
-
-        if (!top || top.type !== 'comment') {
-            console.log(`[Template] Unexpected 'comment' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        stack.pop();
-    }
-
-    handleFilter(token, stack, ctx, index) {
-        let match = token.value.match(/^filter\s(\w+)$/);
-
-        if (!match) {
-            console.log(`[Template] Invalid 'filter' syntax line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        stack.push({
-            type: 'capture',
-            filter: match[1],
-            value: ''
-        });
-    }
-
-    handleEndfilter(token, stack, ctx, index) {
-        let top = stack[stack.length - 1];
-
-        if (!top || top.type !== 'capture') {
-            console.log(`[Template] Unexpected 'endfilter' tag line ${token.line} column ${token.column}`);
-
-            return;
-        }
-
-        stack.pop();
-
-        stack.push({
-            type: 'output',
-            output: this.parseFilter(top.value, top.filter, ctx)
+            output: values[state.index],
         });
     }
 

@@ -90,7 +90,7 @@ export class CurlyTag {
         this.operator = {
             not: ' !',
             and: ' && ',
-            or: ' || '
+            or: ' || ',
         };
 
         this.filter = {
@@ -118,7 +118,7 @@ export class CurlyTag {
                     '<': '&lt;',
                     '>': '&gt;',
                     '"': '&quot;',
-                    "'": '&#39;'
+                    "'": '&#39;',
                 };
 
                 return String(value ?? '').replace(/[&<>"']/g, (matched) => (callback)[matched] || matched);
@@ -134,7 +134,7 @@ export class CurlyTag {
                     '&apos;': "'",
                     '&#39;': "'",
                     '&quot;': '"',
-                    '&#34;': '"'
+                    '&#34;': '"',
                 };
 
                 let regex = new RegExp(Object.keys(unescaped).join('|'), 'g');
@@ -356,28 +356,28 @@ export class CurlyTag {
                 return value.reduce((accumulator, currentValue) => accumulator + currentValue, amount);
             },
             push: (value, item) => {
-                let copy = [ ...value ];
+                let copy = [...value];
 
                 copy.push(item);
 
                 return copy;
             },
             pop: (value) => {
-                let copy = [ ...value ];
+                let copy = [...value];
 
                 copy.pop();
 
                 return copy;
             },
             shift: (value) => {
-                let copy = [ ...value ];
+                let copy = [...value];
 
                 copy.shift();
 
                 return copy;
             },
             unshift: (value, item) => {
-                let copy = [ ...value ];
+                let copy = [...value];
 
                 copy.unshift(item);
 
@@ -665,7 +665,7 @@ export class CurlyTag {
             if (match.index > index) {
                 token.push({
                     type: 'text',
-                    raw: template.slice(index, match.index)
+                    raw: template.slice(index, match.index),
                 });
             }
 
@@ -676,7 +676,7 @@ export class CurlyTag {
                     value: output,
                     raw: raw,
                     line: line,
-                    column: index
+                    column: index,
                 });
             }
 
@@ -708,7 +708,7 @@ export class CurlyTag {
                 if (command in this.openclose) {
                     let entry = {
                         type: command,
-                        index: token.length
+                        index: token.length,
                     };
 
                     if (forRef !== undefined) {
@@ -724,7 +724,7 @@ export class CurlyTag {
                     value: tag,
                     raw: raw,
                     line: line,
-                    column: index
+                    column: index,
                 });
             }
 
@@ -736,7 +736,7 @@ export class CurlyTag {
         if (index < template.length) {
             token.push({
                 type: 'text',
-                raw: template.slice(index)
+                raw: template.slice(index),
             });
         }
 
@@ -937,7 +937,7 @@ export class CurlyTag {
 
         stack.push({
             type: 'output',
-            output: output
+            output: output,
         });
     }
 
@@ -978,7 +978,7 @@ export class CurlyTag {
 
             stack.push({
                 type: 'if',
-                active: true
+                active: true,
             });
 
             return token.end;

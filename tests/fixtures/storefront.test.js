@@ -26,7 +26,7 @@ describe('OpenCart storefront syntax', () => {
         const result = curlytag.parse(filterArgsTemplate, {
             headline: 'Featured %s',
             product_name: 'Camera',
-            status: 'Status: %s'
+            status: 'Status: %s',
         });
 
         expect(textContent(result)).toContain('Featured Camera');
@@ -45,7 +45,7 @@ describe('OpenCart storefront syntax', () => {
             sorts: [
                 { href: '/name-asc', text: 'Name ascending', value: 'name-ASC' },
                 { href: '/price-desc', text: 'Price descending', value: 'price-DESC' }
-            ]
+            ],
         });
 
         expect(textContent(result)).toBe(
@@ -57,7 +57,7 @@ describe('OpenCart storefront syntax', () => {
 
     test.fails('sets and increments a counter inside a loop', () => {
         const result = curlytag.parse(setCounterTemplate, {
-            products: [ 'Camera', 'Lens', 'Tripod' ]
+            products: ['Camera', 'Lens', 'Tripod'],
         });
 
         expect(textContent(result).replaceAll(' ', '')).toBe('2:Camera;3:Lens;4:Tripod;');
@@ -67,7 +67,7 @@ describe('OpenCart storefront syntax', () => {
         const result = curlytag.parse(reservedWordsTemplate, {
             continue: 'next',
             class: 'featured',
-            return: 'back'
+            return: 'back',
         });
 
         expect(textContent(result)).toBe('next|featured|back');
@@ -75,18 +75,18 @@ describe('OpenCart storefront syntax', () => {
 
     test.fails('does not throw on a parenthesised filter call feeding a loop', () => {
         expect(() => curlytag.parse(filterChainTemplate, {
-            banners: [ 'a', 'b', 'c', 'd', 'e' ],
+            banners: ['a', 'b', 'c', 'd', 'e'],
             items: 2,
-            products: [ 'x', 'y', 'z' ]
+            products: ['x', 'y', 'z'],
         })).not.toThrow();
     });
 
     test('renders nested navigation blocks and their empty branches', () => {
         const populated = curlytag.parse(navBlocksTemplate, {
             categories: [
-                { name: 'Hardware', links: [ 'Cameras', 'Lenses' ] },
+                { name: 'Hardware', links: ['Cameras', 'Lenses'] },
                 { name: 'Services', links: [] }
-            ]
+            ],
         });
         const empty = curlytag.parse(navBlocksTemplate, { categories: [] });
 

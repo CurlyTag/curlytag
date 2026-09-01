@@ -27,7 +27,7 @@ describe('string', () => {
             expect(
                 curlytag.parse('{{ value | format: product.quantity, product.name }}', {
                     value: 'OpenCart has %d %s in stock',
-                    product: { name: 'products', quantity: 3 }
+                    product: { name: 'products', quantity: 3 },
                 })
             ).toBe('OpenCart has 3 products in stock');
         });
@@ -35,7 +35,7 @@ describe('string', () => {
         test('renders escaped percent signs without consuming an argument', () => {
             expect(
                 curlytag.parse("{{ value | format: 'complete' }}", {
-                    value: '100%% %s'
+                    value: '100%% %s',
                 })
             ).toBe('100% complete');
         });
@@ -45,7 +45,7 @@ describe('string', () => {
                 curlytag.parse('{{ value | format: quantity, enabled }}', {
                     enabled: false,
                     quantity: 0,
-                    value: '%s:%s'
+                    value: '%s:%s',
                 })
             ).toBe('0:false');
         });
@@ -64,7 +64,7 @@ describe('string', () => {
     test('replace', () => {
         expect(
             curlytag.parse('{{ greeting | replace: "world", "earth" }}', {
-                greeting: 'hello world'
+                greeting: 'hello world',
             })
         ).toBe('hello earth');
     });
@@ -92,7 +92,7 @@ describe('string', () => {
     test('striptag removes style block including contents', () => {
         expect(
             curlytag.parse('{{ html | striptag }}', {
-                html: '<style>body{color:red}</style>hello'
+                html: '<style>body{color:red}</style>hello',
             })
         ).toBe('hello');
     });

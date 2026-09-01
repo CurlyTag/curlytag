@@ -14,7 +14,7 @@ import { curlytag } from '#curlytag';
  * describing what the storefront needs, not what the engine does today.
  */
 
-const list = [ 'a', 'b', 'c', 'd', 'e' ];
+const list = ['a', 'b', 'c', 'd', 'e'];
 
 describe('filter call styles', () => {
     describe('colon', () => {
@@ -61,7 +61,7 @@ describe('filter call styles', () => {
                 curlytag.parse('{{ text|format(store, title) }}', {
                     text: '%s / %s',
                     store: 'Shop',
-                    title: 'GDPR'
+                    title: 'GDPR',
                 })
             ).toBe('Shop / GDPR');
         });

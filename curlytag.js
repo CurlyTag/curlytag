@@ -828,7 +828,11 @@ export class CurlyTag {
             let args = [];
 
             if (argument) {
-                args = this.evaluate('[' + argument + ']', ctx);
+                let evaluatedArgs = this.evaluate('[' + argument + ']', ctx);
+
+                if (Array.isArray(evaluatedArgs)) {
+                    args = evaluatedArgs;
+                }
             }
 
             let func = this.filter[name];

@@ -637,6 +637,13 @@ export class CurlyTag {
             index++;
         }
 
+        // Flush output produced by the final tag when there is no next token to consume it.
+        let pending = stack[stack.length - 1];
+
+        if (pending?.type === 'output' && pending.output != null) {
+            output += pending.output;
+        }
+
         return output;
     }
 

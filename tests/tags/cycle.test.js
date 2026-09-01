@@ -48,6 +48,10 @@ describe('cycle', () => {
         expect(curlytag.parse(tpl, {})).toBe('a-b-a-');
     });
 
+    test('outputs when cycle is the last token in the template', () => {
+        expect(curlytag.parse('{% cycle "a", "b" %}', {})).toBe('a');
+    });
+
     test('invalid syntax produces no output', () => {
         expect(curlytag.parse('{% cycle %}text', {})).toBe('text');
     });

@@ -17,6 +17,7 @@ export class CurlyTag {
 
         this.handler = {
             assign: this.handleAssign.bind(this),
+            set: this.handleAssign.bind(this),
             capture: this.handleCapture.bind(this),
             endcapture: this.handleEndcapture.bind(this),
             if: this.handleIf.bind(this),
@@ -898,15 +899,16 @@ export class CurlyTag {
     }
 
     /**
-     * Handle assign statement
+     * Handle assign and set statements
      *
+     * assign var = expression | filter1 | filter2
      * set var = expression | filter1 | filter2
      */
     handleAssign(token, stack, ctx, index) {
-        let match = token.value.match(/^assign\s(\w+)\s=\s([^|]+?)\s*(?:\s*\|\s*(.+))?$/);
+        let match = token.value.match(/^(?:assign|set)\s(\w+)\s=\s([^|]+?)\s*(?:\s*\|\s*(.+))?$/);
 
         if (!match) {
-            console.log(`[Template] Invalid 'assign' syntax ${this.describeToken(token)}`);
+            console.log(`[Template] Invalid '${token.tag}' syntax ${this.describeToken(token)}`);
 
             return;
         }

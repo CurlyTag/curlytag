@@ -55,7 +55,7 @@ describe('OpenCart storefront syntax', () => {
         expect(result).toContain('<option value="/price-desc">Price descending</option>');
     });
 
-    test.fails('sets and increments a counter inside a loop', () => {
+    test('sets and increments a counter inside a loop', () => {
         const result = curlytag.parse(setCounterTemplate, {
             products: ['Camera', 'Lens', 'Tripod'],
         });

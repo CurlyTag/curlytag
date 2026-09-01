@@ -10,8 +10,8 @@ describe('diagnostics', () => {
         const output = curlytag.tokenize('text\n{{ value }}').find((token) => token.type === 'output');
         const tag = curlytag.tokenize('text\n{% if value %}{% endif %}').find((token) => token.type === 'tag');
 
-        expect(output).toMatchObject({ line: 2, column: 0 });
-        expect(tag).toMatchObject({ line: 2, column: 0 });
+        expect(output).toMatchObject({ raw: '{{ value }}', line: 2, column: 0 });
+        expect(tag).toMatchObject({ raw: '{% if value %}', line: 2, column: 0 });
     });
 
     test('reports the location of invalid tag syntax', () => {
@@ -19,7 +19,9 @@ describe('diagnostics', () => {
 
         curlytag.parse('text\n{% if %}');
 
-        expect(log).toHaveBeenCalledWith("[Template] Invalid 'if' syntax line 2 column 0");
+        expect(log).toHaveBeenCalledWith(
+            "[Template] Invalid 'if' syntax line 2 column 0: {% if %}"
+        );
     });
 
     test('reports the error cause and expression for evaluation failures', () => {

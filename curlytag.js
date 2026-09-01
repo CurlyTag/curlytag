@@ -677,19 +677,36 @@ export class CurlyTag {
 
                 // Handle Close Tags
                 let top = stack[stack.length - 1];
+                let forRef;
 
                 if (top && this.openclose[top.type].includes(command)) {
                     token[top.index].end = token.length;
 
-                    stack.pop();
+                    let popped = stack.pop();
+
+                    if (command === 'else' && popped.type === 'for') {
+                        forRef = popped.index;
+                    } else if (
+                        command === 'endfor'
+                        && popped.type === 'else'
+                        && popped.forRef !== undefined
+                    ) {
+                        token[popped.forRef].loopEnd = token.length;
+                    }
                 }
 
                 // Handle Open Tags
                 if (command in this.openclose) {
-                    stack.push({
+                    let entry = {
                         type: command,
                         index: token.length
-                    });
+                    };
+
+                    if (forRef !== undefined) {
+                        entry.forRef = forRef;
+                    }
+
+                    stack.push(entry);
                 }
 
                 token.push({
@@ -1085,18 +1102,20 @@ export class CurlyTag {
             items = this.parseFilter(items, filter, ctx);
         }
 
+        let endIndex = token.loopEnd ?? token.end;
+
         stack.push({
             type: 'for',
             name: name,
             items: items,
             index: -1,
             start: index + 1,
-            end: token.end,
+            end: endIndex,
             active: items.length > 0,
             parent: { ...ctx },
         });
 
-        return token.end;
+        return items.length > 0 ? endIndex : token.end;
     }
 
     handleEndfor(token, stack, ctx, index) {
@@ -1115,21 +1134,7 @@ export class CurlyTag {
             // Restore parent context (prevents leakage)
             Object.assign(ctx, top.parent);
 
-            let pos = top.name.indexOf(',');
-
-            if (pos === false) {
-                ctx[top.name] = top.items[top.index]; // ← top.name (not top.name)
-            } else {
-                this.evaluate(ctx, ctx);
-
-                //let keys = top.name.split(',');
-
-                //for (let key of keys) {
-
-                //}
-            }
-
-
+            ctx[top.name] = top.items[top.index];
 
             ctx.loop = {
                 index: top.index + 1,
@@ -1186,6 +1191,9 @@ export class CurlyTag {
 
         // Loop finished → cleanup
         stack.pop();
+
+        delete ctx[top.name];
+        delete ctx.loop;
 
         return top.end + 1;
     }

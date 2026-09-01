@@ -5,7 +5,7 @@
 *
 * @author Daniel Kerr
 *
-* OpenCart Twig replacement. Based on Django, Nunjucks template syntax.
+* OpenCart Twig replacement. Based on Django, Nunjucks, Twig template syntax.
 */
 export class CurlyTag {
     static instance = null;
@@ -14,34 +14,40 @@ export class CurlyTag {
         this.directory = '';
         this.path = new Map();
         this.cache = new Map();
+        this.macros = new Map(); // name → { params, tokens, fn }
+        this._imported = {}; // alias → Map of macros (JS importMacros)
 
         this.handler = {
             assign: this.handleAssign.bind(this),
             set: this.handleAssign.bind(this),
             capture: this.handleCapture.bind(this),
-            endcapture: this.handleEndcapture.bind(this),
+            endcapture: this.handleEndCapture.bind(this),
             if: this.handleIf.bind(this),
-            endif: this.handleEndif.bind(this),
+            endif: this.handleEndIf.bind(this),
             else: this.handleElse.bind(this),
-            elseif: this.handleElseif.bind(this),
+            elseif: this.handleElseIf.bind(this),
             unless: this.handleUnless.bind(this),
-            endunless: this.handleEndunless.bind(this),
+            endunless: this.handleEndUnless.bind(this),
             case: this.handleCase.bind(this),
-            endcase: this.handleEndcase.bind(this),
+            endcase: this.handleEndCase.bind(this),
             when: this.handleWhen.bind(this),
             for: this.handleFor.bind(this),
-            endfor: this.handleEndfor.bind(this),
+            endfor: this.handleEndFor.bind(this),
             continue: this.handleContinue.bind(this),
             break: this.handleBreak.bind(this),
             cycle: this.handleCycle.bind(this),
             echo: this.handleEcho.bind(this),
             include: this.handleInclude.bind(this),
             filter: this.handleFilter.bind(this),
-            endfilter: this.handleEndfilter.bind(this),
+            endfilter: this.handleEndFilter.bind(this),
             raw: this.handleRaw.bind(this),
-            endraw: this.handleEndraw.bind(this),
+            endraw: this.handleEndRaw.bind(this),
             comment: this.handleComment.bind(this),
-            endcomment: this.handleEndcomment.bind(this),
+            endcomment: this.handleEndComment.bind(this),
+            macro: this.handleMacro.bind(this),
+            endmacro: this.handleEndMacro.bind(this),
+            import: this.handleImport.bind(this),
+            from: this.handleFrom.bind(this)
         };
 
         this.openclose = {
@@ -1005,7 +1011,7 @@ export class CurlyTag {
      *
      * End If var == expression
      */
-    handleEndif(token, stack, ctx, index) {
+    handleEndIf(token, stack, ctx, index) {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'if') {
@@ -1017,7 +1023,7 @@ export class CurlyTag {
         stack.pop();
     }
 
-    handleElseif(token, stack, ctx, index) {
+    handleElseIf(token, stack, ctx, index) {
         let match = token.value.match(/^elseif\s(.+)$/);
 
         if (!match) {
@@ -1090,7 +1096,7 @@ export class CurlyTag {
         if (!active) return token.end;
     }
 
-    handleEndunless(token, stack, ctx, index) {
+    handleEndUnless(token, stack, ctx, index) {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'unless') {
@@ -1141,7 +1147,7 @@ export class CurlyTag {
         return items.length > 0 ? endIndex : token.end;
     }
 
-    handleEndfor(token, stack, ctx, index) {
+    handleEndFor(token, stack, ctx, index) {
         // If skip we don't want to run evaluate method.
         let top = stack[stack.length - 1];
 
@@ -1157,7 +1163,37 @@ export class CurlyTag {
             // Restore parent context (prevents leakage)
             Object.assign(ctx, top.parent);
 
-            ctx[top.name] = top.items[top.index];
+            let pos = top.name.indexOf(',');
+
+
+
+            //console.log('ctx');
+            //console.log('pos', pos);
+
+            //console.log('top.index', top.items[top.index]);
+
+            if (pos === -1) {
+                ctx[top.name] = top.items[top.index]; // ← top.name (not top.name)
+            } else {
+
+                //let test = { ...top.items[top.index] }
+
+                //ctx = Object.assign(ctx, top.items[top.index]); // ← top.name (not top.name)
+
+
+
+                //console.log(ctx);
+
+                //this.evaluate('[' + top.name]', ctx);
+
+                //let keys = top.name.split(',');
+
+                //for (let key of keys) {
+
+                //}
+            }
+
+
 
             ctx.loop = {
                 index: top.index + 1,
@@ -1260,7 +1296,7 @@ export class CurlyTag {
         top.active = true;
     }
 
-    handleEndcase(token, stack, ctx, index) {
+    handleEndCase(token, stack, ctx, index) {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'case') {
@@ -1288,7 +1324,7 @@ export class CurlyTag {
         });
     }
 
-    handleEndcapture(token, stack, ctx, index) {
+    handleEndCapture(token, stack, ctx, index) {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'capture') {
@@ -1309,7 +1345,7 @@ export class CurlyTag {
         });
     }
 
-    handleEndraw(token, stack, ctx, index) {
+    handleEndRaw(token, stack, ctx, index) {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'raw') {
@@ -1327,7 +1363,7 @@ export class CurlyTag {
         return token.end;
     }
 
-    handleEndcomment(token, stack, ctx, index) {
+    handleEndComment(token, stack, ctx, index) {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'comment') {
@@ -1355,7 +1391,7 @@ export class CurlyTag {
         });
     }
 
-    handleEndfilter(token, stack, ctx, index) {
+    handleEndFilter(token, stack, ctx, index) {
         let top = stack[stack.length - 1];
 
         if (!top || top.type !== 'capture') {
@@ -1370,6 +1406,22 @@ export class CurlyTag {
             type: 'output',
             output: this.parseFilter(top.value, top.filter, ctx),
         });
+    }
+
+    handleMacro(token, stack, ctx, index) {
+
+    }
+
+    handleEndMacro(token, stack, ctx, index) {
+
+    }
+
+    handleImport(token, stack, ctx, index) {
+
+    }
+
+    handleFrom(token, stack, ctx, index) {
+
     }
 
     handleCycle(token, stack, ctx, index) {

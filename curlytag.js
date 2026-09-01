@@ -708,17 +708,17 @@ export class CurlyTag {
     evaluate(expression, ctx) {
         if (!expression) return undefined;
 
-        expression = expression.replaceAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'(\snot\s)|(\sand\s)|(\sor\s)b/g, (match, not, and, or) => {
+        expression = expression.replaceAll(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(not)\s+|\b(and)\b|\b(or)\b/g, (match, not, and, or) => {
             if (not) {
-                return ' !';
+                return '!';
             }
 
             if (and) {
-                return ' && ';
+                return '&&';
             }
 
             if (or) {
-                return ' || ';
+                return '||';
             }
 
             return match;
@@ -729,7 +729,7 @@ export class CurlyTag {
 
             return func({ ...ctx });
         } catch (error) {
-            console.log(`[Template] Warning: Evaluate error '${expression}'`);
+            console.log(`[Template] Warning: Evaluate error '${error}' in expression '${expression}'`);
 
             return undefined;
         }
@@ -750,6 +750,10 @@ export class CurlyTag {
                 return value;
                 break;
             case 'object':
+                if (value === null) {
+                    return false;
+                }
+
                 if (Array.isArray(value)) {
                     return value.length > 0;
                 }

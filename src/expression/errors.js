@@ -43,17 +43,18 @@ const locate = (source, position) => {
  * `1 | price @ 2`
  * `  |       ^`
  */
-export class LexerError extends SyntaxError {
+export class SourceError extends SyntaxError {
     /**
+     * @param {string} name Error class name.
      * @param {object} details Information used to build the diagnostic.
      * @param {string} details.source Full source text.
      * @param {number} details.position Absolute UTF-16 offset of the problem.
-     * @param {string} details.found Character found at that position.
+     * @param {string} details.found Text found at that position.
      * @param {string} details.code Stable error code, for example `LEX001`.
      * @param {string} details.summary Short explanation of the problem.
      * @param {string} details.hint Friendly suggestion for fixing it.
      */
-    constructor({ source, position, found, code, summary, hint }) {
+    constructor(name, { source, position, found, code, summary, hint }) {
         const location = locate(source, position);
         const gutterWidth = String(location.line).length;
         const emptyGutter = ' '.repeat(gutterWidth);
@@ -71,13 +72,19 @@ export class LexerError extends SyntaxError {
 
         super(message);
 
-        this.name = 'LexerError';
+        this.name = name;
         this.code = code;
         this.source = source;
         this.position = position;
         this.line = location.line;
         this.column = location.column;
         this.found = found;
+    }
+}
+
+export class LexerError extends SourceError {
+    constructor(details) {
+        super('LexerError', details);
     }
 }
 

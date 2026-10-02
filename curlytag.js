@@ -1142,20 +1142,18 @@ export class CurlyTag {
             items = this.parseFilter(items, filter, ctx);
         }
 
-        let end = token.loopEnd ?? token.end;
-
         stack.push({
             type: 'for',
             name: name,
             items: items,
             index: -1,
             start: index + 1,
-            end: end,
+            end: token.end,
             active: items.length > 0,
             parent: { ...ctx }
         });
 
-        return items.length > 0 ? end : token.end;
+        return token.end;
     }
 
     handleEndFor(token, stack, ctx, index) {

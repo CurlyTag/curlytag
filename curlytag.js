@@ -1422,11 +1422,81 @@ export class CurlyTag {
     }
 
     handleMacro(token, stack, ctx, index) {
+        let match = token.value.match(/^macro\s+(\w+)\s*\(([^)]*)\)\s*$/);
 
+        if (!match) {
+            console.log(`[Template] Invalid 'macro' syntax ${token.raw ? 'line ' + token.line + ' column ' + token.column + ': ' + token.raw : 'line ' + token.line + ' column ' + token.column}`);
+
+            stack.push({ type: 'macro' });
+
+            return token.end;
+        }
+
+        let [, name, paramList] = match;
+
+        let params = paramList.trim() ? paramList.split(',').map((param) => {
+            let [paramName, defaultExpression] = param.split('=');
+
+            return {
+                name: paramName.trim(),
+                default: defaultExpression !== undefined ? defaultExpression.trim() : undefined,
+            };
+        }) : [];
+
+        this.macro.set(name, {
+            params: params,
+            // The macro's body, captured from the current template's own
+            // token stream — see the `this._tokens` note in process().
+            tokens: this._tokens.slice(index + 1, token.end),
+        });
+
+        stack.push({ type: 'macro' });
+
+        // Skip straight to the matching endmacro — the body only renders
+        // (via callMacro/process) when the macro is actually called.
+        return token.end;
     }
 
     handleEndMacro(token, stack, ctx, index) {
+        let top = stack[stack.length - 1];
 
+        if (!top || top.type !== 'macro') {
+            console.log(`[Template] Unexpected 'endmacro' tag ${token.raw ? 'line ' + token.line + ' column ' + token.column + ': ' + token.raw : 'line ' + token.line + ' column ' + token.column}`);
+
+            return;
+        }
+
+        stack.pop();
+    }
+
+    /**
+     * Renders a macro's captured body with its parameters bound to the
+     * given (unevaluated) argument-list expression, e.g. `'Daniel', 'Hi'`
+     * from a call like `greet('Daniel', 'Hi')`.
+     */
+    callMacro(macro, argsExpression, ctx) {
+        let args = this.evaluate('[' + argsExpression + ']', ctx);
+
+        if (!Array.isArray(args)) {
+            args = [];
+        }
+
+        // A macro's body renders against its own isolated scope (just its
+        // parameters) rather than the caller's context, so it can't
+        // accidentally read or clobber unrelated variables.
+        let scope = {};
+
+        macro.params.forEach((param, i) => {
+            let value = args[i];
+
+            if (value === undefined && param.default !== undefined) {
+                value = this.evaluate(param.default, ctx);
+            }
+
+            scope[param.name] = value;
+        });
+
+        return this.process(macro.tokens, scope);
     }
 
     handleImport(token, stack, ctx, index) {
